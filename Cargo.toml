@@ -1,0 +1,7 @@
+[package]
+name = "http"
+version = "0.1.0"
+authors = ["KizzyCode Software Labs./Keziah Biermann"]
+
+[dev-dependencies]
+network_io = { git = "https://github.com/KizzyCode/network_io.git" }

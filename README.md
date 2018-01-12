@@ -7,7 +7,7 @@ We provide the following features:
  - Creating/sending and receiving/parsing of arbitrary HTTP-request- and -response-headers
  - Creating/sending and receiving/parsing chunked, sized and legacy HTTP-bodies
  
-# Build and installation
+# Build Library and Documentation
 To build the documentation, go into the projects root-directory and run `cargo doc --release`; to open the documentation
 in your web-browser, run `cargo doc --open`.
 

@@ -11,5 +11,5 @@ We provide the following features:
 To build the documentation, go into the projects root-directory and run `cargo doc --release`; to open the documentation
 in your web-browser, run `cargo doc --open`.
 
-To build the library, go into the projects root-directory and `run cargo build --release`; you can find the build in
+To build the library, go into the projects root-directory and run `cargo build --release`; you can find the build in
 target/release.

@@ -3,9 +3,9 @@
 # About
 This library provides basic functionality to create/send and receive/parse HTTP-headers and -bodies.
 
-We provide the following features:
+We provide the following building blocks:
  - Creating/sending and receiving/parsing of arbitrary HTTP-request- and -response-headers
- - Creating/sending and receiving/parsing chunked, sized and legacy HTTP-bodies
+ - Helper functions for parsing a chunked HTTP-body
  
 # Build Library and Documentation
 To build the documentation, go into the projects root-directory and run `cargo doc --release`; to open the documentation

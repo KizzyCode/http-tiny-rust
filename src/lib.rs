@@ -13,8 +13,6 @@ pub use header::{ Header, RequestHeaderView, ResponseHeaderView };
 pub enum HttpError {
 	IoError,
 	ProtocolError,
-	Unsupported,
-	
 	ApiMisuse
 }
 impl From<std::string::FromUtf8Error> for HttpError {

@@ -4,19 +4,24 @@ use super::io::{ self, WriteableBuffer };
 use super::{ Error, HttpError };
 
 
-
+#[derive(Debug, Clone)]
 pub struct Header {
 	pub header_line: (String, String, String),
 	pub fields: std::collections::BTreeMap<String, String>
 }
 impl Header {
+	/// Creates an empty header
+	pub fn empty() -> Self {
+		Header{ header_line: (String::new(), String::new(), String::new()), fields: std::collections::BTreeMap::new() }
+	}
+	
 	/// Creates a new header
 	pub fn new<S: ToString>(header_line: (S, S, S), fields: &[(S, S)]) -> Self {
 		// Map fields
 		let mut fields_map = std::collections::BTreeMap::new();
 		for key_value in fields { fields_map.insert(key_value.0.to_string(), key_value.1.to_string()); }
 		
-		Header { header_line: (header_line.0.to_string(), header_line.1.to_string(), header_line.2.to_string()), fields: fields_map }
+		Header{ header_line: (header_line.0.to_string(), header_line.1.to_string(), header_line.2.to_string()), fields: fields_map }
 	}
 	
 	/// Parses a header
@@ -29,7 +34,7 @@ impl Header {
 		
 		// Parse request-line
 		let header_line = {
-			let segments = if let Some(line) = lines.next() { line.split(" ").collect::<Vec<&str>>() }
+			let segments = if let Some(line) = lines.next() { line.splitn(3, " ").collect::<Vec<&str>>() }
 				else { throw_err!(HttpError::ProtocolError, "No request-line given") };
 			
 			if segments.len() == 3 { (segments[0].to_string(), segments[1].to_string(), segments[2].to_string()) }
@@ -39,7 +44,7 @@ impl Header {
 		// Parse fields
 		let mut fields = std::collections::BTreeMap::new();
 		for line in lines {
-			let key_value = line.split(" ").collect::<Vec<&str>>();
+			let key_value = line.splitn(2, " ").collect::<Vec<&str>>();
 			if key_value.len() == 2 { fields.insert(key_value[0].to_string(), key_value[1].trim_left().to_string()); }
 				else { throw_err!(HttpError::ProtocolError, "Invalid header-field") }
 		}
@@ -96,7 +101,7 @@ impl Header {
 	/// retry/continue writing by providing the same `output` and `buffer` again_
 	pub fn write_header<T: io::ReadableBuffer<u8> + io::WriteableBuffer<u8>>(&self, output: &mut io::Writer, buffer: &mut T, timeout: std::time::Duration) -> Result<(), Error<HttpError>> {
 		// Serialize if necessary
-		if *io::WriteableBuffer::pos(buffer) == 0 { try_err!(self.serialize(buffer.remaining())); }
+		if io::WriteableBuffer::pos(buffer) == 0 { try_err!(self.serialize(buffer.remaining_mut())); }
 		
 		// Send the (remaining) buffer
 		Ok(try_err!(output.write_exact(buffer, timeout), HttpError::IoError))
@@ -114,7 +119,7 @@ impl Header {
 }
 
 
-
+#[derive(Debug)]
 pub struct RequestHeaderView<'a> {
 	pub method: &'a mut String,
 	pub uri: &'a mut String,
@@ -122,6 +127,7 @@ pub struct RequestHeaderView<'a> {
 	pub fields: &'a mut std::collections::BTreeMap<String, String>
 }
 
+#[derive(Debug)]
 pub struct ResponseHeaderView<'a> {
 	pub version: &'a mut String,
 	pub code: &'a mut String,

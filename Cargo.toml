@@ -1,6 +1,6 @@
 [package]
 name = "http"
-version = "0.2.1"
+version = "0.2.2"
 authors = ["KizzyCode Software Labs./Keziah Biermann"]
 
 [dependencies]

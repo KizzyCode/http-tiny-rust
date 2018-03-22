@@ -3,6 +3,7 @@ use std;
 use super::io::{ self, WriteableBuffer };
 use super::{ Error, HttpError };
 
+#[derive(Debug, Clone)]
 pub struct ChunkLength {
 	len: u64
 }
@@ -78,7 +79,7 @@ impl ChunkLength {
 	/// retry/continue writing by providing the same `output` and `buffer` again_
 	pub fn write_length<T: io::ReadableBuffer<u8> + io::WriteableBuffer<u8>>(&self, output: &mut io::Writer, buffer: &mut T, timeout: std::time::Duration) -> Result<(), Error<HttpError>> {
 		// Serialize if necessary
-		if *io::WriteableBuffer::pos(buffer) == 0 { try_err!(self.serialize(buffer.remaining())); }
+		if io::WriteableBuffer::pos(buffer) == 0 { try_err!(self.serialize(buffer.remaining_mut())); }
 		
 		// Send the (remaining) buffer
 		Ok(try_err!(output.write_exact(buffer, timeout), HttpError::IoError))

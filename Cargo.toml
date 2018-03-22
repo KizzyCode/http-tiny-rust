@@ -1,7 +1,8 @@
 [package]
 name = "http"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["KizzyCode Software Labs./Keziah Biermann"]
 
-[dev-dependencies]
-network_io = { git = "https://github.com/KizzyCode/network_io.git" }
+[dependencies]
+io = { path = "../io" }
+etrace = { git = "https://github.com/KizzyCode/etrace" }

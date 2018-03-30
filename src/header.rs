@@ -71,7 +71,7 @@ impl Header {
 	pub fn serialized_len(&self) -> usize {
 		let mut len = self.header_line.0.len() + 1 + self.header_line.1.len() + 1 + self.header_line.2.len() + 2;
 		for (key, value) in self.fields.iter() { len += key.len() + 2 + value.len() + 2 }
-		len + 4
+		len + 2
 	}
 	
 	/// Serializes the header into `buffer`

@@ -7,7 +7,7 @@ description = "A simple, dependency-less HTTP-header builder and parser"
 categories = ["data-structures", "encoding", "network-programming", "parsing", "web-programming"]
 keywords = ["HTTP", "HTTP-Header", "HTTP-Request", "HTTP-Response"]
 license = "BSD-2-Clause OR MIT"
-repository = "https://github.com/KizzyCode/http_request"
+repository = "https://github.com/KizzyCode/http_header"
 readme = "README.md"
 
 

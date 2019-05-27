@@ -1,8 +1,29 @@
 [package]
-name = "http"
-version = "0.2.3"
+name = "http_header"
+edition = "2018"
+version = "0.3.0"
 authors = ["KizzyCode Software Labs./Keziah Biermann"]
+description = "A simple, dependency-less HTTP-header builder and parser"
+categories = ["data-structures", "encoding", "network-programming", "parsing", "web-programming"]
+keywords = ["HTTP", "HTTP-Header", "HTTP-Request", "HTTP-Response"]
+license = "BSD-2-Clause OR MIT"
+repository = "https://github.com/KizzyCode/http_request"
+readme = "README.md"
+
+
+[badges]
+travis-ci = { repository = "KizzyCode/http_header" }
+appveyor = { repository = "KizzyCode/http_header" }
+maintenance = { status = "actively-developed" }
+is-it-maintained-open-issues = { repository = "KizzyCode/http_header" }
+is-it-maintained-issue-resolution = { repository = "KizzyCode/http_header" }
+
 
 [dependencies]
-io = { git = "https://github.com/KizzyCode/io" }
-etrace = { git = "https://github.com/KizzyCode/etrace" }
+
+
+[profile.release]
+overflow-checks = true
+
+[profile.bench]
+overflow-checks = true

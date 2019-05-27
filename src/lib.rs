@@ -1,27 +1,25 @@
-#[macro_use] extern crate etrace;
-extern crate io;
-
+mod helpers;
+pub mod data;
 pub mod header;
-pub mod chunked_body;
 
-use etrace::Error;
-pub use header::{ Header, RequestHeaderView, ResponseHeaderView };
+use std::{
+	error::Error,
+	fmt::{ self, Display, Formatter }
+};
 
 
-
-#[derive(Debug, Clone)]
+/// A `http` related error
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum HttpError {
-	IoError,
-	ProtocolError,
-	ApiMisuse
+	InvalidEncoding,
+	TruncatedData,
+	ProtocolViolation,
+	ApiMisuse,
+	Debug
 }
-impl From<std::string::FromUtf8Error> for HttpError {
-	fn from(_: std::string::FromUtf8Error) -> Self {
-		HttpError::ProtocolError
+impl Display for HttpError {
+	fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+		write!(f, "{:?}", self)
 	}
 }
-impl From<std::num::ParseIntError> for HttpError {
-	fn from(_: std::num::ParseIntError) -> Self {
-		HttpError::ProtocolError
-	}
-}
+impl Error for HttpError {}

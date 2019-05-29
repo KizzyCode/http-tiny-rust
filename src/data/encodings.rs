@@ -5,7 +5,7 @@ use std::{ str, fmt::Debug, hash::Hasher };
 
 
 /// An encoding
-pub trait Encoding: Debug + Default {
+pub trait Encoding: Copy + Clone + Debug + Default {
 	/// Checks if `bytes` conform to the encoding
 	fn is_valid(bytes: &[u8]) -> bool;
 	/// Checks if `a` is equal to `b` (can be overridden; e.g. to perform a case-insensitive
@@ -18,11 +18,11 @@ pub trait Encoding: Debug + Default {
 		hasher.write(bytes);
 	}
 }
-/// A human readable encoding
-pub trait HumanReadable: Encoding {}
+/// An encoding which is a subset of UTF-8
+pub trait Utf8Subset: Encoding {}
 
 
-/// An encoding for printable ASCII characters
+/// Printable ASCII characters
 ///
 /// This ASCII mode includes all
 ///  - alphabetic characters (U+0041 'A' ... U+005A 'Z' or U+0061 'a' ... U+007A 'z')
@@ -34,7 +34,7 @@ pub trait HumanReadable: Encoding {}
 ///    - U+003A ... U+0040 `: ; < = > ? @`
 ///    - U+005B ... U+0060 ``[ \ ] ^ _ ` ``
 ///    - U+007B ... U+007E `{ | } ~`
-#[derive(Debug, Default)]
+#[derive(Copy, Clone, Debug, Default)]
 pub struct Ascii;
 impl Encoding for Ascii {
 	fn is_valid(bytes: &[u8]) -> bool {
@@ -46,10 +46,10 @@ impl Encoding for Ascii {
 		bytes.iter().all(is_printable)
 	}
 }
-impl HumanReadable for Ascii {}
+impl Utf8Subset for Ascii {}
 
 
-/// A header-field-key according to
+/// A header-field key according to [RFC 7230](https://tools.ietf.org/html/rfc7230#section-3.2)
 ///
 /// This ASCII mode includes all
 ///  - alphabetic characters
@@ -57,7 +57,7 @@ impl HumanReadable for Ascii {}
 ///  - punctuation characters
 ///  - whitespace characters (U+0020 SPACE, U+0009 HORIZONTAL TAB, U+000A LINE FEED, U+000C FORM
 ///    FEED, or U+000D CARRIAGE RETURN)
-#[derive(Debug, Default)]
+#[derive(Copy, Clone, Debug, Default)]
 pub struct HeaderFieldKey;
 impl Encoding for HeaderFieldKey {
 	fn is_valid(bytes: &[u8]) -> bool {
@@ -83,52 +83,99 @@ impl Encoding for HeaderFieldKey {
 		hasher.write(s.as_bytes());
 	}
 }
-impl HumanReadable for HeaderFieldKey {}
+impl Utf8Subset for HeaderFieldKey {}
 
 
-/// A valid URI according to [RFC 3986](https://tools.ietf.org/html/rfc3986#section-2)
-#[derive(Debug, Default)]
+/// A valid URI according to [RFC 3986](https://tools.ietf.org/html/rfc3986)
+#[derive(Copy, Clone, Debug, Default)]
 pub struct Uri;
+impl Uri {
+	/// Checks if `b` and the next two chars contain a valid
+	/// [percent encoding](https://tools.ietf.org/html/rfc3986#section-2.1)
+	fn percent_encoding(b: u8, next: &mut Iterator<Item = &u8>) -> bool {
+		match b {
+			b'%' => {
+				// Take the next two bytes and ensure that they are hex digits
+				let ab = match next.take(2).collect_min(2) {
+					Some(ab) => ab,
+					None => return false
+				};
+				ab.iter().all(|b| b.is_ascii_hexdigit())
+			},
+			_ => return false
+		}
+	}
+	
+	/// Checks if `b` is one of the
+	/// [unreserved chars](https://tools.ietf.org/html/rfc3986#section-2.3)
+	fn unreserved(b: u8) -> bool {
+		b.is_ascii_alphanumeric() || b"-._~".contains(&b)
+	}
+	
+	/// Checks if `b` is one of the [`gen-delims`](https://tools.ietf.org/html/rfc3986#section-2.2)
+	fn gen_delims(b: u8) -> bool {
+		b":/?#[]@".contains(&b)
+	}
+	/// Checks if `b` is one of the [`sub-delims`](https://tools.ietf.org/html/rfc3986#section-2.2)
+	fn sub_delims(b: u8) -> bool {
+		b"!$&'()*+,;=".contains(&b)
+	}
+	/// Checks if `b` is one of the
+	/// [reserved chars](https://tools.ietf.org/html/rfc3986#section-2.2)
+	fn reserved(b: u8) -> bool {
+		Self::gen_delims(b) || Self::sub_delims(b)
+	}
+}
 impl Encoding for Uri {
 	fn is_valid(bytes: &[u8]) -> bool {
 		// Validate that all characters are valid URI characters
 		let mut bytes = bytes.iter();
 		while let Some(b) = bytes.next() {
 			match *b {
-				// Unreserved chars
-				b if b.is_ascii_alphanumeric() => continue,
-				b if b"-._~".contains(&b) => continue,
-				// Reserved chars
-				b if b":/?#[]@".contains(&b) => continue,
-				b if b"!$&'()*+,;=".contains(&b) => continue,
-				// Percent encoding
-				b'%' => {
-					// Take the next two bytes
-					let ab = match bytes.by_ref().take(2).collect_min(2) {
-						Some(ab) => ab,
-						None => return false
-					};
-					// Ensure that the next two bytes are hex-digits
-					match ab.iter().all(|b| b.is_ascii_hexdigit()) {
-						true => continue,
-						false => return false
-					}
-				},
-				_ => return false
+				b if Self::unreserved(b) => continue,
+				b if Self::reserved(b) => continue,
+				b => match Self::percent_encoding(b, &mut bytes) {
+					true => continue,
+					false => return false
+				}
 			}
 		}
 		true
 	}
 }
-impl HumanReadable for Uri {}
+impl Utf8Subset for Uri {}
+
+
+/// A valid query according to [RFC 3986](https://tools.ietf.org/html/rfc3986#section-3.4)
+#[derive(Copy, Clone, Debug, Default)]
+pub struct UriQuery;
+impl Encoding for UriQuery {
+	fn is_valid(bytes: &[u8]) -> bool {
+		// Validate that all characters are valid URI characters
+		let mut bytes = bytes.iter();
+		while let Some(b) = bytes.next() {
+			match *b {
+				b if Uri::unreserved(b) => continue,
+				b if Uri::sub_delims(b) => continue,
+				b':' | b'@' => continue,
+				b => match Uri::percent_encoding(b, &mut bytes) {
+					true => continue,
+					false => return false
+				}
+			}
+		}
+		true
+	}
+}
+impl Utf8Subset for UriQuery {}
 
 
 /// An ASCII encoded integer (U+0030 '0' ... U+0039 '9')
-#[derive(Debug, Default)]
+#[derive(Copy, Clone, Debug, Default)]
 pub struct Integer;
 impl Encoding for Integer {
 	fn is_valid(bytes: &[u8]) -> bool {
 		bytes.iter().all(u8::is_ascii_digit)
 	}
 }
-impl HumanReadable for Integer {}
+impl Utf8Subset for Integer {}

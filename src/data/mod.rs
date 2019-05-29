@@ -1,22 +1,21 @@
 //! A data implementation that ensures that it's bytes correspond to a particular encoding like
 //! UTF-8, ASCII etc.
 //!
-//! This mod is used to constrain the HTTP header-(line-)fields to their context-specific encoding.
+//! This mod is used to constrain the HTTP header parts to their context-specific encoding.
 
 pub mod encodings;
 
 use crate::{
 	HttpError,
-	data::encodings::{ Encoding, HumanReadable, Integer }
+	data::encodings::{ Encoding, Utf8Subset, Integer }
 };
 use std::{
 	str, u128, convert::TryFrom, marker::PhantomData, num::ParseIntError, ops::Deref,
-	hash::{ Hash, Hasher },
-	fmt::{ self, Display, Formatter }
+	hash::{ Hash, Hasher }, fmt::{ self, Display, Formatter }
 };
 
 
-/// A helper macro to convert a static `$str` into a target using the `TryInto`-trait
+/// A helper macro to convert a static `$str` into a `Data`-target using the `TryInto`-trait
 ///
 /// _Panics if `try_into` fails_
 #[macro_export] macro_rules! data {
@@ -56,12 +55,12 @@ impl<'a, E: Encoding> AsRef<[u8]> for Data<'a, E> {
 		self.underlying
 	}
 }
-impl<'a, E: Encoding + HumanReadable> AsRef<str> for Data<'a, E> {
+impl<'a, E: Encoding + Utf8Subset> AsRef<str> for Data<'a, E> {
 	fn as_ref(&self) -> &str {
 		str::from_utf8(self.underlying).unwrap()
 	}
 }
-impl<'a, E: Encoding + HumanReadable> Display for Data<'a, E> {
+impl<'a, E: Encoding + Utf8Subset> Display for Data<'a, E> {
 	fn fmt(&self, f: &mut Formatter) -> fmt::Result {
 		f.write_str(self.as_ref())
 	}

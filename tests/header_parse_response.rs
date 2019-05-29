@@ -1,3 +1,4 @@
+#[macro_use] extern crate http_header;
 use http_header::{
 	HttpError, header::parse_response,
 	data::{
@@ -10,10 +11,8 @@ use std::collections::HashMap;
 
 macro_rules! map {
 	($($key:expr => $value:expr),+) => ({
-		use ::std::convert::TryInto;
-		
 		let mut map = ::std::collections::HashMap::new();
-		$( map.insert($key.try_into().unwrap(), $value.try_into().unwrap()); )*
+		$( map.insert(data!($key), data!($value)); )*
 		map
 	});
 	() => (::std::collections::HashMap::new());

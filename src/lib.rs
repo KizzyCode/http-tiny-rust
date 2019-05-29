@@ -1,4 +1,5 @@
 mod helpers;
+mod query_string;
 pub mod data;
 pub mod header;
 
@@ -6,6 +7,7 @@ use std::{
 	error::Error,
 	fmt::{ self, Display, Formatter }
 };
+pub use crate::query_string::QueryString;
 
 
 /// A `http` related error

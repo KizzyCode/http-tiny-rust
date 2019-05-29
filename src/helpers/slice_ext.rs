@@ -70,37 +70,49 @@ impl<'a, T: PartialEq + Clone> SliceExt<'a, T> for [T] {
 }
 
 
+/// An extension for byte slices
 pub trait ByteSliceExt<'a> {
+	/// Returns a slice without the leading bytes matching `pat`
+	fn trim_start_matches(&'a self, pat: impl Fn(&u8) -> bool) -> &'a Self;
+	/// Returns a slice without the trailing bytes matching `pat`
+	fn trim_end_matches(&'a self, pat: impl Fn(&u8) -> bool) -> &'a Self;
+	/// Returns a slice without the leading and trailing bytes matching `pat`
+	fn trim_matches(&'a self, pat: impl Fn(&u8) -> bool) -> &'a Self {
+		self.trim_start_matches(&pat).trim_end_matches(&pat)
+	}
+	
 	/// Returns a slice without the leading whitespace bytes
 	///
 	/// "Whitespace" is defined as an ASCII whitespace character:
 	/// U+0020 SPACE, U+0009 HORIZONTAL TAB, U+000A LINE FEED, U+000C FORM FEED, or U+000D CARRIAGE
 	/// RETURN.
-	fn trim_start(&'a self) -> &'a Self;
+	fn trim_start(&'a self) -> &'a Self {
+		self.trim_start_matches(u8::is_ascii_whitespace)
+	}
 	/// Returns a slice without the trailing whitespace bytes
 	///
 	/// "Whitespace" is defined as an ASCII whitespace character:
 	/// U+0020 SPACE, U+0009 HORIZONTAL TAB, U+000A LINE FEED, U+000C FORM FEED, or U+000D CARRIAGE
 	/// RETURN.
-	fn trim_end(&'a self) -> &'a Self;
+	fn trim_end(&'a self) -> &'a Self {
+		self.trim_end_matches(u8::is_ascii_whitespace)
+	}
 	/// Returns a slice without the leading and trailing whitespace bytes
 	///
 	/// "Whitespace" is defined as an ASCII whitespace character:
 	/// U+0020 SPACE, U+0009 HORIZONTAL TAB, U+000A LINE FEED, U+000C FORM FEED, or U+000D CARRIAGE
 	/// RETURN.
 	fn trim(&'a self) -> &'a Self {
-		self.trim_start().trim_end()
+		self.trim_matches(u8::is_ascii_whitespace)
 	}
 }
 impl<'a> ByteSliceExt<'a> for [u8] {
-	fn trim_start(&'a self) -> &'a Self {
-		let len = self.iter()
-			.take_while(|b| b.is_ascii_whitespace()).count();
+	fn trim_start_matches(&'a self, pat: impl Fn(&u8) -> bool) -> &'a Self {
+		let len = self.iter().cloned().take_while(pat).count();
 		self.split_at(len).1
 	}
-	fn trim_end(&'a self) -> &'a Self {
-		let len = self.iter().rev()
-			.take_while(|b| b.is_ascii_whitespace()).count();
+	fn trim_end_matches(&'a self, pat: impl Fn(&u8) -> bool) -> &'a Self {
+		let len = self.iter().cloned().rev().take_while(pat).count();
 		self.split_at(self.len() - len).0
 	}
 }

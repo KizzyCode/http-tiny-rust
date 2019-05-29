@@ -12,7 +12,7 @@ use crate::{
 };
 use std::{
 	collections::HashMap,
-	io::{ self, Read, Write },
+	io::{ self, Read, Write, Cursor },
 	convert::{ TryFrom, TryInto }
 };
 
@@ -141,6 +141,13 @@ impl<'a> RequestHeader<'a> {
 	pub fn write(&self, sink: &mut Write) -> Result<usize, io::Error> {
 		self.0.serialize(sink)
 	}
+	
+	/// Serializes the header into a vector
+	pub fn to_vec(&self) -> Vec<u8> {
+		let mut sink = Cursor::new(Vec::new());
+		self.write(&mut sink).unwrap();
+		sink.into_inner()
+	}
 }
 
 
@@ -174,5 +181,12 @@ impl<'a> ResponseHeader<'a> {
 	/// Serializes and writes the header to `sink` and returns the amount of bytes written
 	pub fn write(&self, sink: &mut Write) -> Result<usize, io::Error> {
 		self.0.serialize(sink)
+	}
+	
+	/// Serializes the header into a vector
+	pub fn to_vec(&self) -> Vec<u8> {
+		let mut sink = Cursor::new(Vec::new());
+		self.write(&mut sink).unwrap();
+		sink.into_inner()
 	}
 }

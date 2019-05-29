@@ -20,10 +20,8 @@ use std::{
 /// _Panics if `try_into` fails_
 #[macro_export] macro_rules! data {
 	($str:expr) => ({
-		use ::std::convert::TryInto;
-	
 		let str: &'static str = $str;
-		str.try_into().unwrap()
+		::std::convert::TryInto::try_into(str).unwrap()
 	});
 }
 

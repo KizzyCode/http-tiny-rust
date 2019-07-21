@@ -1,4 +1,5 @@
 mod helpers;
+mod owned_ref;
 mod query_string;
 pub mod data;
 pub mod header;
@@ -7,10 +8,10 @@ use std::{
 	error::Error,
 	fmt::{ self, Display, Formatter }
 };
-pub use crate::query_string::QueryString;
+pub use crate::{ owned_ref::OwnedRef, query_string::QueryString };
 
 
-/// A `http` related error
+/// A `http_header` related error
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum HttpError {
 	InvalidEncoding,

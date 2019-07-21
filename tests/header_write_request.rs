@@ -7,7 +7,7 @@ use std::io::Cursor;
 
 
 struct Test {
-	header: RequestHeader<'static>,
+	header: RequestHeader,
 	data: &'static[u8]
 }
 impl Test {
@@ -45,7 +45,7 @@ fn test() {
 
 
 struct TestErr {
-	builder: RequestBuilder<'static>,
+	builder: RequestBuilder,
 	e: HttpError
 }
 impl TestErr {

@@ -15,34 +15,34 @@ use crate::helpers::slice_ext::ByteSliceExt;
 
 /// A [query string](https://tools.ietf.org/html/rfc3986#section-3.4)
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct QueryString<'a>(HashMap<Data<'a, UriQuery>, Data<'a, UriQuery>>);
-impl<'a> QueryString<'a> {
+pub struct QueryString(HashMap<Data<UriQuery>, Data<UriQuery>>);
+impl QueryString {
 	/// Create a new `QueryUri` instance
 	pub fn new() -> Self {
 		Self(HashMap::new())
 	}
 	
 	/// Gets a reference to the field for `key`
-	pub fn field<'b: 'a>(&self, key: &Data<'b, UriQuery>) -> Option<&Data<'a, UriQuery>> {
+	pub fn field(&self, key: &Data<UriQuery>) -> Option<&Data<UriQuery>> {
 		self.0.get(&key)
 	}
 	/// Gets a mutable reference to field for `key`
-	pub fn field_mut<'b: 'a>(&mut self, key: &Data<'b, UriQuery>)
-		-> Option<&mut Data<'a, UriQuery>>
+	pub fn field_mut(&mut self, key: &Data<UriQuery>)
+		-> Option<&mut Data<UriQuery>>
 	{
 		self.0.get_mut(&key)
 	}
 	/// Inserts a new field with `key` and `value`
-	pub fn insert(&mut self, key: Data<'a, UriQuery>, value: Data<'a, UriQuery>) {
+	pub fn insert(&mut self, key: Data<UriQuery>, value: Data<UriQuery>) {
 		self.0.insert(key, value);
 	}
 	
 	/// A reference to the fields
-	pub fn fields(&self) -> &HashMap<Data<'a, UriQuery>, Data<'a, UriQuery>> {
+	pub fn fields(&self) -> &HashMap<Data<UriQuery>, Data<UriQuery>> {
 		&self.0
 	}
 	/// A mutable reference to the fields
-	pub fn fields_mut(&mut self) -> &mut HashMap<Data<'a, UriQuery>, Data<'a, UriQuery>> {
+	pub fn fields_mut(&mut self) -> &mut HashMap<Data<UriQuery>, Data<UriQuery>> {
 		&mut self.0
 	}
 	
@@ -61,11 +61,10 @@ impl<'a> QueryString<'a> {
 		String::from_utf8(query).unwrap()
 	}
 }
-impl<'a> TryFrom<Data<'a, Uri>> for QueryString<'a> {
+impl TryFrom<Data<Uri>> for QueryString {
 	type Error = HttpError;
-	fn try_from(uri: Data<'a, Uri>) -> Result<Self, Self::Error> {
+	fn try_from(uri: Data<Uri>) -> Result<Self, Self::Error> {
 		// Cut-off the part before the query string and remove an optional fragment appendix
-		let uri = uri.as_slice();
 		let query_part = match uri.splitn_pat(2, b"?").collect_min(2) {
 			Some(query_part) => query_part[1],
 			None => return Ok(Self::new())

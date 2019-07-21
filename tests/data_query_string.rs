@@ -21,12 +21,12 @@ macro_rules! map {
 
 struct Test {
 	uri: &'static[u8],
-	expected: HashMap<Data<'static, UriQuery>, Data<'static, UriQuery>>
+	expected: HashMap<Data<UriQuery>, Data<UriQuery>>
 }
 impl Test {
 	pub fn test(self) {
-		let uri: Data<'static, Uri> = self.uri.try_into().unwrap();
-		let query: QueryString<'static> = uri.try_into().unwrap();
+		let uri: Data<Uri> = self.uri.try_into().unwrap();
+		let query: QueryString = uri.try_into().unwrap();
 		assert_eq!(&self.expected, query.fields());
 	}
 }

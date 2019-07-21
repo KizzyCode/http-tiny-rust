@@ -27,87 +27,98 @@ use std::{
 
 
 /// Some data that conforms to a specific encoding
-#[derive(Copy, Clone, Debug)]
-pub struct Data<'a, E: Encoding> {
-	underlying: &'a[u8],
-	_mode: PhantomData<E>
+#[derive(Clone, Debug)]
+pub struct Data<E: Encoding> {
+	bytes: Vec<u8>,
+	_encoding: PhantomData<E>
 }
-impl<'a, E: Encoding> Data<'a, E> {
+impl<E: Encoding> Data<E> {
 	/// Validates that `bytes` conform to the encoding `M`
 	pub fn validate(bytes: &[u8]) -> bool {
 		E::is_valid(bytes)
 	}
-	/// Returns a reference to the underlying slice
-	pub fn as_slice(&self) -> &'a[u8] {
-		self.underlying
-	}
 }
-impl<'a, E: Encoding> Deref for Data<'a, E> {
+impl<E: Encoding> Deref for Data<E> {
 	type Target = [u8];
 	fn deref(&self) -> &Self::Target {
-		self.underlying
+		&self.bytes
 	}
 }
-impl<'a, E: Encoding> AsRef<[u8]> for Data<'a, E> {
+impl<E: Encoding> AsRef<[u8]> for Data<E> {
 	fn as_ref(&self) -> &[u8] {
-		self.underlying
+		self
 	}
 }
-impl<'a, E: Encoding + Utf8Subset> AsRef<str> for Data<'a, E> {
+impl<E: Encoding + Utf8Subset> AsRef<str> for Data<E> {
 	fn as_ref(&self) -> &str {
-		str::from_utf8(self.underlying).unwrap()
+		str::from_utf8(self).unwrap()
 	}
 }
-impl<'a, E: Encoding + Utf8Subset> Display for Data<'a, E> {
+impl<E: Encoding + Utf8Subset> Display for Data<E> {
 	fn fmt(&self, f: &mut Formatter) -> fmt::Result {
 		f.write_str(self.as_ref())
 	}
 }
-impl<'a, 'b, E: Encoding> PartialEq<Data<'b, E>> for Data<'a, E> {
-	fn eq(&self, other: &Data<'b, E>) -> bool {
+impl<E: Encoding> PartialEq for Data<E> {
+	fn eq(&self, other: &Data<E>) -> bool {
 		E::is_eq(self, other)
 	}
 }
-impl<'a, E: Encoding> PartialEq<&str> for Data<'a, E> {
+impl<E: Encoding> PartialEq<&str> for Data<E> {
 	fn eq(&self, other: &&str) -> bool {
 		E::is_eq(self, other.as_bytes())
 	}
 }
-impl<'a, E: Encoding> PartialEq<Data<'a, E>> for &str {
-	fn eq(&self, other: &Data<'a, E>) -> bool {
+impl<E: Encoding> PartialEq<Data<E>> for &str {
+	fn eq(&self, other: &Data<E>) -> bool {
 		E::is_eq(self.as_bytes(), other)
 	}
 }
-impl<'a, E: Encoding> Eq for Data<'a, E> {}
-impl<'a, E: Encoding> Hash for Data<'a, E> {
+impl<E: Encoding> Eq for Data<E> {}
+impl<E: Encoding> Hash for Data<E> {
 	fn hash<H: Hasher>(&self, state: &mut H) {
-		E::hash(self.underlying, state)
+		E::hash(self, state)
 	}
 }
-impl<'a, 'b: 'a, E: Encoding> TryFrom<&'b str> for Data<'a, E> {
+
+
+impl<E: Encoding> TryFrom<&str> for Data<E> {
 	type Error = HttpError;
-	fn try_from(source: &'b str) -> Result<Self, Self::Error> {
+	fn try_from(source: &str) -> Result<Self, Self::Error> {
 		Self::try_from(source.as_bytes())
 	}
 }
-impl<'a, 'b: 'a, E: Encoding> TryFrom<&'b[u8]> for Data<'a, E> {
+impl<E: Encoding> TryFrom<&[u8]> for Data<E> {
 	type Error = HttpError;
-	fn try_from(bytes: &'b[u8]) -> Result<Self, Self::Error> {
-		match Self::validate(bytes) {
-			true => Ok(Self{ underlying: bytes, _mode: PhantomData }),
+	fn try_from(bytes: &[u8]) -> Result<Self, Self::Error> {
+		Self::try_from(bytes.to_vec())
+	}
+}
+impl<E: Encoding> TryFrom<Vec<u8>> for Data<E> {
+	type Error = HttpError;
+	fn try_from(bytes: Vec<u8>) -> Result<Self, Self::Error> {
+		match Self::validate(&bytes) {
+			true => Ok(Self{ bytes, _encoding: PhantomData }),
 			false => Err(HttpError::InvalidEncoding)
 		}
 	}
 }
-impl<'a> TryFrom<Data<'a, Integer>> for u128 {
+
+
+impl<E: Encoding> From<Data<E>> for Vec<u8> {
+	fn from(data: Data<E>) -> Self {
+		data.bytes
+	}
+}
+impl TryFrom<Data<Integer>> for u128 {
 	type Error = ParseIntError;
-	fn try_from(data: Data<'a, Integer>) -> Result<Self, Self::Error> {
+	fn try_from(data: Data<Integer>) -> Result<Self, Self::Error> {
 		Self::from_str_radix(data.as_ref(), 10)
 	}
 }
-impl<'a> TryFrom<Data<'a, Integer>> for u16 {
+impl<'a> TryFrom<Data<Integer>> for u16 {
 	type Error = ParseIntError;
-	fn try_from(data: Data<'a, Integer>) -> Result<Self, Self::Error> {
+	fn try_from(data: Data<Integer>) -> Result<Self, Self::Error> {
 		Self::from_str_radix(data.as_ref(), 10)
 	}
 }

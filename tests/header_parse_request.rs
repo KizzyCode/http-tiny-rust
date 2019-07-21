@@ -24,7 +24,7 @@ struct Test {
 	method: &'static str,
 	uri: &'static str,
 	version: &'static str,
-	fields: HashMap<Data<'static, HeaderFieldKey>, Data<'static, Ascii>>,
+	fields: HashMap<Data<HeaderFieldKey>, Data<Ascii>>,
 	body: &'static[u8]
 }
 impl Test {

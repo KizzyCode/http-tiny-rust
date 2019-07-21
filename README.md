@@ -5,7 +5,7 @@
 [![Download numbers](https://img.shields.io/crates/d/http_header.svg)](https://crates.io/crates/http_header)
 [![Travis CI](https://travis-ci.org/KizzyCode/http_header.svg?branch=master)](https://travis-ci.org/KizzyCode/http_header)
 [![AppVeyor CI](https://ci.appveyor.com/api/projects/status/github/KizzyCode/http_header?svg=true)](https://ci.appveyor.com/project/KizzyCode/http-header)
-[![dependency status](https://deps.rs/crate/http_header/0.1.3/status.svg)](https://deps.rs/crate/http_header/0.3.0)
+[![dependency status](https://deps.rs/crate/http_header/0.4.0/status.svg)](https://deps.rs/crate/http_header/0.4.0)
 
 
 # About

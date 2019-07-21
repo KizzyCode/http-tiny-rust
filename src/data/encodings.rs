@@ -22,6 +22,16 @@ pub trait Encoding: Copy + Clone + Debug + Default {
 pub trait Utf8Subset: Encoding {}
 
 
+/// An encoding that allows all bytes
+#[derive(Copy, Clone, Debug, Default)]
+pub struct Binary;
+impl Encoding for Binary {
+	fn is_valid(_bytes: &[u8]) -> bool {
+		true
+	}
+}
+
+
 /// Printable ASCII characters
 ///
 /// This ASCII mode includes all

@@ -28,18 +28,14 @@ pub fn read(mut source: impl Read, buf: &mut[u8]) -> Result<Option<usize>, io::E
 /// Parses a HTTP request header from `bytes`
 ///
 /// Returns the header and the remaining body data in `bytes` if any (`(header, body_data)`)
-pub fn parse_request<'a, 'b: 'a>(bytes: &'b[u8])
-	-> Result<(RequestHeader<'a>, &'b[u8]), HttpError>
-{
+pub fn parse_request(bytes: &[u8]) -> Result<(RequestHeader, &[u8]), HttpError> {
 	let (header, body) = Header::parse(bytes)?;
 	Ok((RequestHeader(header), body))
 }
 /// Parses a HTTP response header from `bytes`
 ///
 /// Returns the header and the remaining body data in `bytes` if any (`(header, body_data)`)
-pub fn parse_response<'a, 'b: 'a>(bytes: &'b[u8])
-	-> Result<(ResponseHeader<'a>, &'b[u8]), HttpError>
-{
+pub fn parse_response(bytes: &[u8]) -> Result<(ResponseHeader, &[u8]), HttpError> {
 	let (header, body) = Header::parse(bytes)?;
 	Ok((ResponseHeader(header), body))
 }
@@ -47,19 +43,19 @@ pub fn parse_response<'a, 'b: 'a>(bytes: &'b[u8])
 
 /// An opaque HTTP header implementation
 #[derive(Debug)]
-pub(in crate::header) struct Header<'a> {
-	pub header_line: (&'a[u8], &'a[u8], &'a[u8]),
-	pub header_fields: HashMap<Data<'a, HeaderFieldKey>, Data<'a, Ascii>>
+pub(in crate::header) struct Header {
+	pub header_line: (Vec<u8>, Vec<u8>, Vec<u8>),
+	pub header_fields: HashMap<Data<HeaderFieldKey>, Data<Ascii>>
 }
-impl<'a> Header<'a> {
-	fn parse(bytes: &'a[u8]) -> Result<(Self, &'a[u8]), HttpError> {
+impl Header {
+	fn parse(bytes: &[u8]) -> Result<(Self, &[u8]), HttpError> {
 		const SPACE: &[u8] = b" ";
 		const SEPARATOR: &[u8] = b":";
 		const NEWLINE: &[u8] = b"\r\n";
 		const END: &[u8] = b"\r\n\r\n";
 		
 		// Split data into header and body
-		let header_body = bytes.as_ref().splitn_pat(2, &END)
+		let header_body = bytes.splitn_pat(2, &END)
 			.collect_min(2).ok_or(HttpError::TruncatedData)?;
 		let mut header = header_body[0].split_pat(&NEWLINE);
 		let body = header_body[1];
@@ -68,7 +64,7 @@ impl<'a> Header<'a> {
 		let status_line = header.next().ok_or(HttpError::ProtocolViolation)?
 			.trim().split_pat(&SPACE)
 			.collect_exact(3).ok_or(HttpError::ProtocolViolation)?;
-		let status_line = (status_line[0], status_line[1], status_line[2]);
+		let status_line = (status_line[0].into(), status_line[1].into(), status_line[2].into());
 		
 		// Parse header fields
 		let mut header_fields = HashMap::new();
@@ -90,9 +86,9 @@ impl<'a> Header<'a> {
 		let mut written = 0;
 		
 		// Write header line
-		sink.write(self.header_line.0)?.write(SPACE)?
-			.write(self.header_line.1)?.write(SPACE)?
-			.write(self.header_line.2)?.write(NEWLINE)?;
+		sink.write(&self.header_line.0)?.write(SPACE)?
+			.write(&self.header_line.1)?.write(SPACE)?
+			.write(&self.header_line.2)?.write(NEWLINE)?;
 		written += self.header_line.0.len() + SPACE.len()
 			+ self.header_line.1.len() + SPACE.len()
 			+ self.header_line.2.len() + NEWLINE.len();
@@ -113,27 +109,27 @@ impl<'a> Header<'a> {
 
 /// A HTTP request header
 #[derive(Debug)]
-pub struct RequestHeader<'a>(pub(in crate::header) Header<'a>);
-impl<'a> RequestHeader<'a> {
+pub struct RequestHeader(pub(in crate::header) Header);
+impl RequestHeader {
 	/// The request method
-	pub fn method(&'a self) -> Result<Data<'a, Ascii>, HttpError> {
-		self.0.header_line.0.try_into()
+	pub fn method(&self) -> Result<Data<Ascii>, HttpError> {
+		self.0.header_line.0.as_slice().try_into()
 	}
 	/// The requested URI
-	pub fn uri(&'a self) -> Result<Data<'a, Uri>, HttpError> {
-		self.0.header_line.1.try_into()
+	pub fn uri(&self) -> Result<Data<Uri>, HttpError> {
+		self.0.header_line.1.as_slice().try_into()
 	}
 	/// The HTTP version
-	pub fn version(&'a self) -> Result<Data<'a, Ascii>, HttpError> {
-		self.0.header_line.2.try_into()
+	pub fn version(&self) -> Result<Data<Ascii>, HttpError> {
+		self.0.header_line.2.as_slice().try_into()
 	}
 	
 	/// Gets the field for `key` if any
-	pub fn field(&self, key: Data<'a, HeaderFieldKey>) -> Option<&Data<'a, Ascii>> {
+	pub fn field(&self, key: Data<HeaderFieldKey>) -> Option<&Data<Ascii>> {
 		self.0.header_fields.get(&key)
 	}
 	/// Returns an iterator over all header fields
-	pub fn fields(&self) -> &HashMap<Data<'a, HeaderFieldKey>, Data<'a, Ascii>> {
+	pub fn fields(&self) -> &HashMap<Data<HeaderFieldKey>, Data<Ascii>> {
 		&self.0.header_fields
 	}
 	
@@ -153,28 +149,28 @@ impl<'a> RequestHeader<'a> {
 
 /// A HTTP response header
 #[derive(Debug)]
-pub struct ResponseHeader<'a>(pub(in crate::header) Header<'a>);
-impl<'a> ResponseHeader<'a> {
+pub struct ResponseHeader(pub(in crate::header) Header);
+impl ResponseHeader {
 	/// The HTTP version
-	pub fn version(&'a self) -> Result<Data<'a, Ascii>, HttpError> {
-		self.0.header_line.0.try_into()
+	pub fn version(&self) -> Result<Data<Ascii>, HttpError> {
+		self.0.header_line.0.as_slice().try_into()
 	}
 	/// The status code
-	pub fn status(&'a self) -> Result<u16, HttpError> {
-		let status = Data::<Integer>::try_from(self.0.header_line.1)?;
+	pub fn status(&self) -> Result<u16, HttpError> {
+		let status = Data::<Integer>::try_from(self.0.header_line.1.as_slice())?;
 		Ok(u16::try_from(status).map_err(|_| HttpError::ProtocolViolation)?)
 	}
 	/// The status reason
-	pub fn reason(&'a self) -> Result<Data<'a, Ascii>, HttpError> {
-		self.0.header_line.2.try_into()
+	pub fn reason(&self) -> Result<Data<Ascii>, HttpError> {
+		self.0.header_line.2.as_slice().try_into()
 	}
 	
 	/// Gets the field for `key` if any
-	pub fn field(&self, key: Data<'a, HeaderFieldKey>) -> Option<&Data<'a, Ascii>> {
+	pub fn field(&self, key: Data<HeaderFieldKey>) -> Option<&Data<Ascii>> {
 		self.0.header_fields.get(&key)
 	}
 	/// Returns an iterator over all header fields
-	pub fn fields(&self) -> &HashMap<Data<'a, HeaderFieldKey>, Data<'a, Ascii>> {
+	pub fn fields(&self) -> &HashMap<Data<HeaderFieldKey>, Data<Ascii>> {
 		&self.0.header_fields
 	}
 	

@@ -16,8 +16,7 @@ pub enum HttpError {
 	InvalidEncoding,
 	TruncatedData,
 	ProtocolViolation,
-	ApiMisuse,
-	Debug
+	ApiMisuse
 }
 impl Display for HttpError {
 	fn fmt(&self, f: &mut Formatter) -> fmt::Result {

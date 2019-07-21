@@ -2,10 +2,7 @@ use crate::{
 	HttpError,
 	header::{ self, RequestHeader, ResponseHeader }
 };
-use std::{
-	ops::Deref, pin::Pin, ptr::NonNull,
-	marker::{ PhantomPinned, PhantomData }
-};
+use std::{ marker::PhantomPinned, ops::Deref, pin::Pin, ptr::NonNull };
 
 
 /// A helper trait for `OwnedRef`
@@ -26,20 +23,21 @@ impl<'a> OwnedRefHelper<'a, Vec<u8>, HttpError> for ResponseHeader<'a> {
 
 
 /// A struct which combines an owned object and a reference type based upon the same object
-pub struct OwnedRef<'a, S, T> {
+pub struct OwnedRef<S, T> {
 	source: S,
 	pointer: NonNull<S>,
 	target: Option<T>,
-	_pin: PhantomPinned,
-	_lifetime: PhantomData<&'a S>
+	_pin: PhantomPinned
 }
-impl<'a, S, T> OwnedRef<'a, S, T> {
+impl<S, T> OwnedRef<S, T> {
 	/// Creates a new owned reference with `source` as the underlying data segment
-	pub fn new<E>(source: S) -> Result<Pin<Box<Self>>, E> where T: OwnedRefHelper<'a, S, E> {
+	pub fn new<'a, E>(source: S) -> Result<Pin<Box<Self>>, E> where S: 'a,
+		T: OwnedRefHelper<'a, S, E>
+	{
 		// Create a base instance and pin it
 		let this = Self {
 			source, pointer: NonNull::dangling(),
-			target: None, _pin: PhantomPinned, _lifetime: PhantomData
+			target: None, _pin: PhantomPinned
 		};
 		let mut pinned = Box::pin(this);
 		
@@ -60,12 +58,12 @@ impl<'a, S, T> OwnedRef<'a, S, T> {
 		Ok(pinned)
 	}
 }
-impl<'a, S, T> AsRef<T> for OwnedRef<'a, S, T> {
+impl<S, T> AsRef<T> for OwnedRef<S, T> {
 	fn as_ref(&self) -> &T {
 		self.target.as_ref().unwrap()
 	}
 }
-impl<'a, S, T> Deref for OwnedRef<'a, S, T> {
+impl<S, T> Deref for OwnedRef<S, T> {
 	type Target = T;
 	fn deref(&self) -> &T {
 		self.target.as_ref().unwrap()

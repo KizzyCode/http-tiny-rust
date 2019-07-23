@@ -3,7 +3,7 @@ use crate::{
 	helpers::{ iter_ext::IterExt, slice_ext::SliceExt },
 	data::{
 		Data,
-		encodings::{ Encoding, Uri, UriQuery}
+		encodings::{ Encoding, Uri, UriQuery }
 	}
 };
 use std::{
@@ -27,9 +27,7 @@ impl QueryString {
 		self.0.get(&key)
 	}
 	/// Gets a mutable reference to field for `key`
-	pub fn field_mut(&mut self, key: &Data<UriQuery>)
-		-> Option<&mut Data<UriQuery>>
-	{
+	pub fn field_mut(&mut self, key: &Data<UriQuery>) -> Option<&mut Data<UriQuery>> {
 		self.0.get_mut(&key)
 	}
 	/// Inserts a new field with `key` and `value`

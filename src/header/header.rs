@@ -125,7 +125,7 @@ impl RequestHeader {
 	}
 	
 	/// Gets the field for `key` if any
-	pub fn field(&self, key: Data<HeaderFieldKey>) -> Option<&Data<Ascii>> {
+	pub fn field(&self, key: &Data<HeaderFieldKey>) -> Option<&Data<Ascii>> {
 		self.0.header_fields.get(&key)
 	}
 	/// Returns an iterator over all header fields

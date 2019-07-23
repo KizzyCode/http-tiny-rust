@@ -134,7 +134,7 @@ impl RequestHeader {
 	}
 	
 	/// Serializes and writes the header to `sink` and returns the amount of bytes written
-	pub fn write(&self, sink: &mut Write) -> Result<usize, io::Error> {
+	pub fn write(&self, sink: &mut dyn Write) -> Result<usize, io::Error> {
 		self.0.serialize(sink)
 	}
 	
@@ -175,7 +175,7 @@ impl ResponseHeader {
 	}
 	
 	/// Serializes and writes the header to `sink` and returns the amount of bytes written
-	pub fn write(&self, sink: &mut Write) -> Result<usize, io::Error> {
+	pub fn write(&self, sink: &mut dyn Write) -> Result<usize, io::Error> {
 		self.0.serialize(sink)
 	}
 	

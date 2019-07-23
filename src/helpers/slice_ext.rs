@@ -56,15 +56,15 @@ impl<'a, T: PartialEq + Debug> Debug for Splitter<'a, T> {
 /// An extension for slices
 pub trait SliceExt<'a, T: PartialEq> {
 	/// Splits the slice by `pat`
-	fn split_pat(&'a self, pat: &'a AsRef<[T]>) -> Splitter<'a, T>;
+	fn split_pat(&'a self, pat: &'a dyn AsRef<[T]>) -> Splitter<'a, T>;
 	/// Splits the slice `n` times by `pat`
-	fn splitn_pat(&'a self, n: usize, pat: &'a AsRef<[T]>) -> Splitter<'a, T>;
+	fn splitn_pat(&'a self, n: usize, pat: &'a dyn AsRef<[T]>) -> Splitter<'a, T>;
 }
 impl<'a, T: PartialEq + Clone> SliceExt<'a, T> for [T] {
-	fn split_pat(&'a self, pat: &'a AsRef<[T]>) -> Splitter<'a, T> {
+	fn split_pat(&'a self, pat: &'a dyn AsRef<[T]>) -> Splitter<'a, T> {
 		self.splitn_pat(usize::max_value(), pat)
 	}
-	fn splitn_pat(&'a self, n: usize, pat: &'a AsRef<[T]>) -> Splitter<'a, T> {
+	fn splitn_pat(&'a self, n: usize, pat: &'a dyn AsRef<[T]>) -> Splitter<'a, T> {
 		Splitter{ data: self, pat: pat.as_ref(), remaining: n }
 	}
 }

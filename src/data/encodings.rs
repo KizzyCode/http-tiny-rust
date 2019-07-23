@@ -14,7 +14,7 @@ pub trait Encoding: Copy + Clone + Debug + Default {
 		a == b
 	}
 	/// Hashes `bytes` (can be overridden; e.g. to compute a case-insensitive hash)
-	fn hash(bytes: &[u8], hasher: &mut Hasher) {
+	fn hash(bytes: &[u8], hasher: &mut dyn Hasher) {
 		hasher.write(bytes);
 	}
 }
@@ -88,7 +88,7 @@ impl Encoding for HeaderFieldKey {
 		let b= str::from_utf8(b).unwrap().to_ascii_lowercase();
 		a == b
 	}
-	fn hash(bytes: &[u8], hasher: &mut Hasher) {
+	fn hash(bytes: &[u8], hasher: &mut dyn Hasher) {
 		let s = str::from_utf8(bytes).unwrap().to_ascii_lowercase();
 		hasher.write(s.as_bytes());
 	}
@@ -102,7 +102,7 @@ pub struct Uri;
 impl Uri {
 	/// Checks if `b` and the next two chars contain a valid
 	/// [percent encoding](https://tools.ietf.org/html/rfc3986#section-2.1)
-	fn percent_encoding(b: u8, next: &mut Iterator<Item = &u8>) -> bool {
+	fn percent_encoding(b: u8, next: &mut dyn Iterator<Item = &u8>) -> bool {
 		match b {
 			b'%' => {
 				// Take the next two bytes and ensure that they are hex digits

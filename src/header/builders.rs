@@ -1,12 +1,11 @@
 use crate::{
-	HttpError,
-	header::{ RequestHeader, ResponseHeader, header::Header },
+	HttpError, Header, RequestHeader, ResponseHeader,
 	data::{
 		Data,
-		encodings::{ Ascii, HeaderFieldKey, Uri, Integer }
+		encodings::{ Ascii, HeaderFieldKey, Uri }
 	}
 };
-use std::collections::HashMap;
+use std::{ collections::HashMap, convert::TryFrom };
 
 
 /// A HTTP-response header builder
@@ -51,10 +50,14 @@ impl RequestBuilder {
 		let uri = self.uri.ok_or(HttpError::ApiMisuse)?;
 		let version = self.version.ok_or(HttpError::ApiMisuse)?;
 		
-		Ok(RequestHeader(Header {
-			header_line: (method.into(), uri.into(), version.into()),
-			header_fields: self.header_fields
-		}))
+		// Convert the URI into a generic ASCII field
+		let uri_ascii: Data<Ascii> = Data::try_from(&uri as &[u8])?;
+		Ok(RequestHeader {
+			header: Header {
+				status_line: (method, uri_ascii, version),
+				fields: self.header_fields
+			}, uri
+		})
 	}
 }
 
@@ -62,7 +65,7 @@ impl RequestBuilder {
 /// A HTTP-response header builder
 pub struct ResponseBuilder {
 	version: Option<Data<Ascii>>,
-	status: Option<Data<Integer>>,
+	status: Option<u16>,
 	reason: Option<Data<Ascii>>,
 	header_fields: HashMap<Data<HeaderFieldKey>, Data<Ascii>>
 }
@@ -78,7 +81,7 @@ impl ResponseBuilder {
 		self
 	}
 	/// Sets the status code
-	pub fn status(mut self, status: Data<Integer>) -> Self {
+	pub fn status(mut self, status: u16) -> Self {
 		self.status = Some(status);
 		self
 	}
@@ -101,9 +104,14 @@ impl ResponseBuilder {
 		let status = self.status.ok_or(HttpError::ApiMisuse)?;
 		let reason = self.reason.ok_or(HttpError::ApiMisuse)?;
 		
-		Ok(ResponseHeader(Header {
-			header_line: (version.into(), status.into(), reason.into()),
-			header_fields: self.header_fields
-		}))
+		// Convert the status integer into a generic ASCII field
+		let status_ascii: Data<Ascii> = Data::try_from(status.to_string().into_bytes())
+			.expect("Should never fail because all number literals are a subset of ASCII");
+		Ok(ResponseHeader {
+			header: Header {
+				status_line: (version, status_ascii, reason),
+				fields: self.header_fields
+			}, status
+		})
 	}
 }

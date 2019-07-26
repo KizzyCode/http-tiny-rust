@@ -1,12 +1,12 @@
 #[macro_use] extern crate http_header;
 use http_header::{
-	HttpError, header::parse_response,
+	HttpError, Header, ResponseHeader,
 	data::{
 		Data,
 		encodings::{ Ascii, HeaderFieldKey }
 	}
 };
-use std::collections::HashMap;
+use std::{ collections::HashMap, convert::TryInto };
 
 
 macro_rules! map {
@@ -29,11 +29,12 @@ struct Test {
 }
 impl Test {
 	fn test(self) {
-		let (header, body) = parse_response(self.data).unwrap();
+		let (header, body) = Header::scan(self.data).unwrap();
+		let header: ResponseHeader = Header::parse(header).unwrap().try_into().unwrap();
 		
-		assert_eq!(self.version, header.version().unwrap());
-		assert_eq!(self.status, header.status().unwrap());
-		assert_eq!(self.reason, header.reason().unwrap());
+		assert_eq!(self.version, header.version());
+		assert_eq!(self.status, header.status());
+		assert_eq!(self.reason, header.reason());
 		assert_eq!(&self.fields, header.fields());
 		assert_eq!(self.body, body);
 	}
@@ -96,11 +97,7 @@ struct TestErr {
 impl TestErr {
 	fn test(self) {
 		fn catch(data: &'static[u8]) -> Result<(), HttpError> {
-			let header = parse_response(data)?.0;
-			
-			header.version()?;
-			header.status()?;
-			header.reason()?;
+			let _: ResponseHeader = Header::parse(data)?.try_into()?;
 			Ok(())
 		}
 		assert_eq!(self.e, catch(self.data).unwrap_err())

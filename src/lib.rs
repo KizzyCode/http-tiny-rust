@@ -1,13 +1,19 @@
 mod helpers;
 mod query_string;
+mod header;
 pub mod data;
-pub mod header;
 
 use std::{
 	error::Error,
 	fmt::{ self, Display, Formatter }
 };
-pub use crate::query_string::QueryString;
+pub use crate::{
+	query_string::QueryString,
+	header::{
+		builders::{ RequestBuilder, ResponseBuilder },
+		header::{ Header, RequestHeader, ResponseHeader }
+	}
+};
 
 
 /// A `http_header` related error

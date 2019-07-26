@@ -1,8 +1,5 @@
 #[macro_use] extern crate http_header;
-use http_header::{
-	HttpError,
-	header::{ RequestBuilder, RequestHeader }
-};
+use http_header::{ HttpError, RequestBuilder, RequestHeader };
 use std::io::Cursor;
 
 

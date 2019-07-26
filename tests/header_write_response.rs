@@ -1,8 +1,5 @@
 #[macro_use] extern crate http_header;
-use http_header::{
-	HttpError,
-	header::{ ResponseBuilder, ResponseHeader }
-};
+use http_header::{ HttpError, ResponseBuilder, ResponseHeader };
 use std::io::Cursor;
 
 
@@ -22,7 +19,7 @@ fn test() {
 	Test {
 		header: ResponseBuilder::new()
 			.version(data!("HTTP/1.1"))
-			.status(data!("200"))
+			.status(200)
 			.reason(data!("OK"))
 			.build().unwrap(),
 		data: b"HTTP/1.1 200 OK\r\n\r\n"
@@ -31,7 +28,7 @@ fn test() {
 	Test {
 		header: ResponseBuilder::new()
 			.version(data!("HTTP/1.1"))
-			.status(data!("200"))
+			.status(200)
 			.reason(data!("OK"))
 			.field(data!("Date"), data!("Sun, 26 May 2019 22:02:50 GMT"))
 			.build().unwrap(),
@@ -59,7 +56,7 @@ fn test_err() {
 	TestErr {
 		builder: ResponseBuilder::new()
 			.version(data!("HTTP/1.1"))
-			.status(data!("200")),
+			.status(200),
 		e: HttpError::ApiMisuse
 	}.test();
 	
@@ -72,7 +69,7 @@ fn test_err() {
 	
 	TestErr {
 		builder: ResponseBuilder::new()
-			.status(data!("200"))
+			.status(200)
 			.reason(data!("OK")),
 		e: HttpError::ApiMisuse
 	}.test();

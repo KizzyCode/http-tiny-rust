@@ -1,4 +1,4 @@
-use http_header::header;
+use http_header::Header;
 use std::io::Cursor;
 
 
@@ -11,7 +11,7 @@ impl Test {
 		let mut source = Cursor::new(self.data);
 		
 		let mut buf = [0; 8192];
-		let len = header::read(&mut source, &mut buf).unwrap();
+		let len = Header::read(&mut source, &mut buf).unwrap();
 		
 		assert_eq!(self.len, len);
 		match self.len {

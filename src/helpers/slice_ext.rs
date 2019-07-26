@@ -1,5 +1,4 @@
-use std::fmt::{Debug, Formatter};
-use std::fmt;
+use std::fmt::{ self, Debug, Formatter };
 
 
 /// An iterator over splitted sub-slices
@@ -55,12 +54,19 @@ impl<'a, T: PartialEq + Debug> Debug for Splitter<'a, T> {
 
 /// An extension for slices
 pub trait SliceExt<'a, T: PartialEq> {
+	/// Gets the index of the *first* occurrence of `pat`
+	fn find(&'a self, pat: &'a dyn AsRef<[T]>) -> Option<usize>;
 	/// Splits the slice by `pat`
 	fn split_pat(&'a self, pat: &'a dyn AsRef<[T]>) -> Splitter<'a, T>;
 	/// Splits the slice `n` times by `pat`
 	fn splitn_pat(&'a self, n: usize, pat: &'a dyn AsRef<[T]>) -> Splitter<'a, T>;
 }
 impl<'a, T: PartialEq + Clone> SliceExt<'a, T> for [T] {
+	fn find(&'a self, pat: &'a dyn AsRef<[T]>) -> Option<usize> {
+		let pat = pat.as_ref();
+		let end = self.len().checked_sub(pat.len())?;
+		(0 ..= end).find(|i| &self[*i .. *i + pat.len()] == pat)
+	}
 	fn split_pat(&'a self, pat: &'a dyn AsRef<[T]>) -> Splitter<'a, T> {
 		self.splitn_pat(usize::max_value(), pat)
 	}

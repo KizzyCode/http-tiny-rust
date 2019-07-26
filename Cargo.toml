@@ -14,7 +14,7 @@ readme = "README.md"
 [badges]
 travis-ci = { repository = "KizzyCode/http_header" }
 appveyor = { repository = "KizzyCode/http_header" }
-maintenance = { status = "passively-maintained" }
+maintenance = { status = "actively-developed" }
 is-it-maintained-open-issues = { repository = "KizzyCode/http_header" }
 is-it-maintained-issue-resolution = { repository = "KizzyCode/http_header" }
 

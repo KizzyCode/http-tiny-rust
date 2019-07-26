@@ -64,12 +64,12 @@ impl<E: Encoding> PartialEq for Data<E> {
 		E::is_eq(self, other)
 	}
 }
-impl<E: Encoding> PartialEq<&str> for Data<E> {
-	fn eq(&self, other: &&str) -> bool {
+impl<E: Encoding> PartialEq<str> for Data<E> {
+	fn eq(&self, other: &str) -> bool {
 		E::is_eq(self, other.as_bytes())
 	}
 }
-impl<E: Encoding> PartialEq<Data<E>> for &str {
+impl<E: Encoding> PartialEq<Data<E>> for str {
 	fn eq(&self, other: &Data<E>) -> bool {
 		E::is_eq(self.as_bytes(), other)
 	}

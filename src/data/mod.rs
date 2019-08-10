@@ -19,10 +19,7 @@ use std::{
 ///
 /// _Panics if `try_into` fails_
 #[macro_export] macro_rules! data {
-	($str:expr) => ({
-		let str: &'static str = $str;
-		::std::convert::TryInto::try_into(str).unwrap()
-	});
+	($str:expr) => (::std::convert::TryInto::try_into($str).unwrap());
 }
 
 
@@ -85,13 +82,19 @@ impl<E: Encoding> Hash for Data<E> {
 impl<E: Encoding> TryFrom<&str> for Data<E> {
 	type Error = HttpError;
 	fn try_from(source: &str) -> Result<Self, Self::Error> {
-		Self::try_from(source.as_bytes())
+		Self::try_from(source.to_string())
 	}
 }
 impl<E: Encoding> TryFrom<&[u8]> for Data<E> {
 	type Error = HttpError;
 	fn try_from(bytes: &[u8]) -> Result<Self, Self::Error> {
 		Self::try_from(bytes.to_vec())
+	}
+}
+impl<E: Encoding> TryFrom<String> for Data<E> {
+	type Error = HttpError;
+	fn try_from(source: String) -> Result<Self, Self::Error> {
+		Self::try_from(source.into_bytes())
 	}
 }
 impl<E: Encoding> TryFrom<Vec<u8>> for Data<E> {

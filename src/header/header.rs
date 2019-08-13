@@ -106,6 +106,12 @@ impl Header {
 		written += NEWLINE.len();
 		Ok(written)
 	}
+	/// Serializes the header into a vector
+	pub fn to_vec(&self) -> Vec<u8> {
+		let mut sink = Cursor::new(Vec::new());
+		self.write(&mut sink).unwrap();
+		sink.into_inner()
+	}
 }
 
 
@@ -136,9 +142,7 @@ macro_rules! repetitive_header_fns {
 		}
 		/// Serializes the header into a vector
 		pub fn to_vec(&self) -> Vec<u8> {
-			let mut sink = Cursor::new(Vec::new());
-			self.header.write(&mut sink).unwrap();
-			sink.into_inner()
+			self.header.to_vec()
 		}
 	};
 }

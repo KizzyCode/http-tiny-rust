@@ -84,7 +84,6 @@ fn test_err() {
 	TestErr{ data: b"HEAD / HTTP/1.1\r\n", e: HttpError::TruncatedData }.test();
 	TestErr{ data: b"\r\n\r\n", e: HttpError::ProtocolViolation }.test();
 	TestErr{ data: b"HEAD / \r\n\r\n", e: HttpError::ProtocolViolation }.test();
-	TestErr{ data: b"HEAD / HTTP/1.1 WAT\r\n\r\n", e: HttpError::ProtocolViolation }.test();
 	TestErr{ data: b"H\xC3\xA4D / HTTP/1.1\r\n\r\n", e: HttpError::InvalidEncoding }.test();
 	TestErr{ data: b"HEAD /l\xC3\xB6l HTTP/1.1\r\n\r\n", e: HttpError::InvalidEncoding }.test();
 	TestErr{ data: b"HEAD / HTT\xC3\x9F/1.1\r\n\r\n", e: HttpError::InvalidEncoding }.test();

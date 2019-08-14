@@ -59,7 +59,7 @@ impl Header {
 		
 		// Parse status line
 		let status_line = header.next().ok_or(HttpError::ProtocolViolation)?
-			.trim().split_pat(&SPACE)
+			.trim().splitn_pat(3, &SPACE)
 			.collect_exact(3).ok_or(HttpError::ProtocolViolation)?;
 		let status_line = (
 			status_line[0].try_into()?,

@@ -20,7 +20,7 @@ use std::{
 /// A generic HTTP/1.* header implementation
 ///
 /// Can be converted into a `RequestHeader`/`ResponseHeader` using the `TryFrom`/`TryInto`-traits
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Header {
 	/// The header status line
 	pub status_line: (Data<Ascii>, Data<Ascii>, Data<Ascii>),
@@ -117,39 +117,42 @@ impl Header {
 
 /// Implements repetitive header functions
 macro_rules! repetitive_header_fns {
-	() => {
-		/// Gets the field for `key` if any
-		pub fn field(&self, key: &Data<HeaderFieldKey>) -> Option<&Data<Ascii>> {
-			self.header.fields.get(&key)
+	($struct:ty) => {
+		impl $struct {
+			/// Gets the field for `key` if any
+			pub fn field(&self, key: &Data<HeaderFieldKey>) -> Option<&Data<Ascii>> {
+				self.header.fields.get(&key)
+			}
+			/// Returns an iterator over all header fields
+			pub fn fields(&self) -> &HashMap<Data<HeaderFieldKey>, Data<Ascii>> {
+				&self.header.fields
+			}
+			
+			/// Serializes and writes the header to `sink` and returns the amount of bytes written
+			pub fn write(&self, sink: impl WriteExt) -> Result<usize, io::Error> {
+				self.header.write(sink)
+			}
+			/// Serializes the header into a vector
+			pub fn to_vec(&self) -> Vec<u8> {
+				self.header.to_vec()
+			}
 		}
-		/// Returns an iterator over all header fields
-		pub fn fields(&self) -> &HashMap<Data<HeaderFieldKey>, Data<Ascii>> {
-			&self.header.fields
+		impl AsRef<Header> for $struct {
+			fn as_ref(&self) -> &Header {
+				&self.header
+			}
 		}
-		
-		/// The underlying "raw" header
-		pub fn inner(&self) -> &Header {
-			&self.header
-		}
-		/// Converts `self` into the underlying "raw" header
-		pub fn into_inner(self) -> Header {
-			self.header
-		}
-		
-		/// Serializes and writes the header to `sink` and returns the amount of bytes written
-		pub fn write(&self, sink: impl WriteExt) -> Result<usize, io::Error> {
-			self.header.write(sink)
-		}
-		/// Serializes the header into a vector
-		pub fn to_vec(&self) -> Vec<u8> {
-			self.header.to_vec()
+		impl From<$struct> for Header {
+			fn from(s: $struct) -> Self {
+				s.header
+			}
 		}
 	};
 }
 
 
 /// A HTTP request header
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct RequestHeader{
 	pub(in crate::header) header: Header,
 	pub(in crate::header) uri: Data<Uri>
@@ -167,8 +170,8 @@ impl RequestHeader {
 	pub fn version(&self) -> &Data<Ascii> {
 		&self.header.status_line.2
 	}
-	repetitive_header_fns!();
 }
+repetitive_header_fns!(RequestHeader);
 impl TryFrom<Header> for RequestHeader {
 	type Error = HttpError;
 	/// Tries to create a `RequestHeader` from a `Header`
@@ -180,7 +183,7 @@ impl TryFrom<Header> for RequestHeader {
 
 
 /// A HTTP response header
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ResponseHeader {
 	pub(in crate::header) header: Header,
 	pub(in crate::header) status: u16
@@ -198,8 +201,8 @@ impl ResponseHeader {
 	pub fn reason(&self) -> &Data<Ascii> {
 		&self.header.status_line.2
 	}
-	repetitive_header_fns!();
 }
+repetitive_header_fns!(ResponseHeader);
 impl TryFrom<Header> for ResponseHeader {
 	type Error = HttpError;
 	/// Tries to create a `RequestHeader` from a `Header`

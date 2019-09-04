@@ -7,7 +7,7 @@ pub mod encodings;
 
 use crate::{
 	HttpError,
-	data::encodings::{ Encoding, Utf8Subset, Integer }
+	data::encodings::{ Encoding, SubsetOf, Utf8, Integer }
 };
 use std::{
 	str, u128, convert::TryFrom, marker::PhantomData, num::ParseIntError, ops::Deref,
@@ -30,6 +30,18 @@ pub struct Data<E: Encoding> {
 	_encoding: PhantomData<E>
 }
 impl<E: Encoding> Data<E> {
+	/// Tries to create `self` from data with a superset encoding
+	pub fn try_from_superset<S: Encoding>(superset: Data<S>) -> Result<Self, HttpError>
+		where E: SubsetOf<S>
+	{
+		Self::try_from(superset.bytes)
+	}
+	/// Creates `self` from data with a subset encoding
+	pub fn from_subset<S: Encoding>(subset: Data<S>) -> Self where S: SubsetOf<E> {
+		Self::try_from(subset.bytes).unwrap()
+	}
+}
+impl<E: Encoding> Data<E> {
 	/// Validates that `bytes` conform to the encoding `M`
 	pub fn validate(bytes: &[u8]) -> bool {
 		E::is_valid(bytes)
@@ -46,12 +58,12 @@ impl<E: Encoding> AsRef<[u8]> for Data<E> {
 		self
 	}
 }
-impl<E: Encoding + Utf8Subset> AsRef<str> for Data<E> {
+impl<E: Encoding + SubsetOf<Utf8>> AsRef<str> for Data<E> {
 	fn as_ref(&self) -> &str {
 		str::from_utf8(self).unwrap()
 	}
 }
-impl<E: Encoding + Utf8Subset> Display for Data<E> {
+impl<E: Encoding + SubsetOf<Utf8>> Display for Data<E> {
 	fn fmt(&self, f: &mut Formatter) -> fmt::Result {
 		f.write_str(self.as_ref())
 	}
@@ -59,6 +71,12 @@ impl<E: Encoding + Utf8Subset> Display for Data<E> {
 impl<E: Encoding> PartialEq for Data<E> {
 	fn eq(&self, other: &Data<E>) -> bool {
 		E::is_eq(self, other)
+	}
+}
+impl<E: Encoding> Eq for Data<E> {}
+impl<E: Encoding> Hash for Data<E> {
+	fn hash<H: Hasher>(&self, state: &mut H) {
+		E::hash(self, state)
 	}
 }
 impl<E: Encoding> PartialEq<str> for Data<E> {
@@ -69,12 +87,6 @@ impl<E: Encoding> PartialEq<str> for Data<E> {
 impl<E: Encoding> PartialEq<Data<E>> for str {
 	fn eq(&self, other: &Data<E>) -> bool {
 		E::is_eq(self.as_bytes(), other)
-	}
-}
-impl<E: Encoding> Eq for Data<E> {}
-impl<E: Encoding> Hash for Data<E> {
-	fn hash<H: Hasher>(&self, state: &mut H) {
-		E::hash(self, state)
 	}
 }
 

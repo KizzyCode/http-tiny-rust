@@ -18,8 +18,8 @@ pub trait Encoding: Copy + Clone + Debug + Default {
 		hasher.write(bytes);
 	}
 }
-/// An encoding which is a subset of UTF-8
-pub trait Utf8Subset: Encoding {}
+/// Defines that `self` is a subset of `T`
+pub trait SubsetOf<T: Encoding>: Encoding {}
 
 
 /// An encoding that allows all bytes
@@ -28,6 +28,16 @@ pub struct Binary;
 impl Encoding for Binary {
 	fn is_valid(_bytes: &[u8]) -> bool {
 		true
+	}
+}
+
+
+/// UTF-8
+#[derive(Copy, Clone, Debug, Default)]
+pub struct Utf8;
+impl Encoding for Utf8 {
+	fn is_valid(bytes: &[u8]) -> bool {
+		str::from_utf8(bytes).is_ok()
 	}
 }
 
@@ -56,7 +66,8 @@ impl Encoding for Ascii {
 		bytes.iter().all(is_printable)
 	}
 }
-impl Utf8Subset for Ascii {}
+impl SubsetOf<Binary> for Ascii {}
+impl SubsetOf<Utf8> for Ascii {}
 
 
 /// A header-field key according to [RFC 7230](https://tools.ietf.org/html/rfc7230#section-3.2)
@@ -93,7 +104,9 @@ impl Encoding for HeaderFieldKey {
 		hasher.write(s.as_bytes());
 	}
 }
-impl Utf8Subset for HeaderFieldKey {}
+impl SubsetOf<Binary> for HeaderFieldKey {}
+impl SubsetOf<Utf8> for HeaderFieldKey {}
+impl SubsetOf<Ascii> for HeaderFieldKey {}
 
 
 /// A valid URI according to [RFC 3986](https://tools.ietf.org/html/rfc3986)
@@ -153,7 +166,9 @@ impl Encoding for Uri {
 		true
 	}
 }
-impl Utf8Subset for Uri {}
+impl SubsetOf<Binary> for Uri {}
+impl SubsetOf<Utf8> for Uri {}
+impl SubsetOf<Ascii> for Uri {}
 
 
 /// A valid query according to [RFC 3986](https://tools.ietf.org/html/rfc3986#section-3.4)
@@ -177,7 +192,9 @@ impl Encoding for UriQuery {
 		true
 	}
 }
-impl Utf8Subset for UriQuery {}
+impl SubsetOf<Binary> for UriQuery {}
+impl SubsetOf<Utf8> for UriQuery {}
+impl SubsetOf<Ascii> for UriQuery {}
 
 
 /// An ASCII encoded integer (U+0030 '0' ... U+0039 '9')
@@ -188,4 +205,6 @@ impl Encoding for Integer {
 		bytes.iter().all(u8::is_ascii_digit)
 	}
 }
-impl Utf8Subset for Integer {}
+impl SubsetOf<Binary> for Integer {}
+impl SubsetOf<Utf8> for Integer {}
+impl SubsetOf<Ascii> for Integer {}

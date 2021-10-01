@@ -126,7 +126,6 @@ impl HeaderStartLine {
         &mut self.field2
     }
 
-
     /// Reads the header fields from `source`
     pub fn read<T>(source: &mut T) -> Result<Self> where T: BufRead {
         // Read the start line

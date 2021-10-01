@@ -1,63 +1,55 @@
-#[macro_use] extern crate http_header;
-use http_header::{
-	QueryString,
-	data::{
-		Data,
-		encodings::{ Uri, UriQuery }
-	}
-};
-use std::{ collections::HashMap, convert::TryInto };
+mod helpers;
+
+use http_header::RequestTarget;
+use std::{ collections::BTreeMap, ops::Deref };
 
 
-macro_rules! map {
-	($($key:expr => $value:expr),+) => ({
-		let mut map = ::std::collections::HashMap::new();
-		$( map.insert(data!($key), data!($value)); )*
-		map
-	});
-	() => (::std::collections::HashMap::new());
-}
-
-
+#[derive(Debug)]
 struct Test {
-	uri: &'static[u8],
-	expected: HashMap<Data<UriQuery>, Data<UriQuery>>
+    raw: &'static [u8],
+    expected: BTreeMap<Vec<u8>, Vec<u8>>
 }
 impl Test {
-	pub fn test(self) {
-		let uri: Data<Uri> = self.uri.try_into().unwrap();
-		let query: QueryString = uri.try_into().unwrap();
-		assert_eq!(&self.expected, query.fields());
-	}
+    pub fn test(self) {
+        let target = RequestTarget::read(&mut helpers::source(self.raw)).expect("Failed to read request target");
+        let query = match target {
+            RequestTarget::Absolute { query, .. } => query,
+            target => panic!("Invalid request target for uri: {} ({:?})", String::from_utf8_lossy(self.raw), target)
+        };
+        assert_eq!(&self.expected, query.deref());
+    }
 }
 #[test]
 fn test() {
-	Test {
-		uri: b"/?code=M696be062-f150-bb19-9944-0c3a0ca60b48&state=99f4bd624dbe53d0ae330eabda904ac4",
-		expected: map!(
-			"code" => "M696be062-f150-bb19-9944-0c3a0ca60b48",
-			"state" => "99f4bd624dbe53d0ae330eabda904ac4"
-		)
-	}.test();
-	
-	Test {
-		uri: concat!(
-			"/secure.flickr.com/search/",
-			"?q=tree+-swing&l=commderiv&d=taken-20000101-20051231&ct=0&lol&mt=all&adv=1&&"
-		).as_bytes(),
-		expected: map!(
-			"q" => "tree+-swing",
-			"l" => "commderiv",
-			"d" => "taken-20000101-20051231",
-			"ct" => "0",
-			"mt" => "all",
-			"adv" => "1",
-			"lol" => ""
-		)
-	}.test();
-	
-	Test{ uri: b"/sth/?", expected: map!() }.test();
-	Test{ uri: b"/sth/", expected: map!() }.test();
+    Test {
+        raw: b"/?code=M696be062-f150-bb19-9944-0c3a0ca60b48&state=99f4bd624dbe53d0ae330eabda904ac4",
+        expected: helpers::map([
+            ("code", "M696be062-f150-bb19-9944-0c3a0ca60b48"),
+            ("state", "99f4bd624dbe53d0ae330eabda904ac4")
+        ])
+    }.test();
+    Test {
+        raw: concat!(
+            "/secure.flickr.com/search/",
+            "?q=tree+-swing&l=commderiv&d=taken-20000101-20051231&ct=0&lol&mt=all&adv=1&&"
+        ).as_bytes(),
+        expected: helpers::map([
+            ("q", "tree+-swing"),
+            ("l", "commderiv"),
+            ("d", "taken-20000101-20051231"),
+            ("ct", "0"),
+            ("mt", "all"),
+            ("adv", "1"),
+            ("lol", "")
+        ])
+    }.test();
+    
+    Test {
+        raw: b"/sth/?",
+        expected: BTreeMap::new()
+    }.test();
+    Test {
+        raw: b"/sth/",
+        expected: BTreeMap::new()
+    }.test();
 }
-
-

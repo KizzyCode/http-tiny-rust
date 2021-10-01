@@ -1,5 +1,4 @@
-Copyright (c) 2019, Keziah Biermann
-
+Copyright (c) 2021, Keziah Biermann
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

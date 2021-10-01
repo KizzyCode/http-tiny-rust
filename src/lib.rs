@@ -1,32 +1,24 @@
-mod helpers;
-mod query_string;
+//! # About
+//! `http_header` is a small, dependency-less crate to create, serialize, read and parse
+//! HTTP/1.1-headers.
+//!
+//! It is not designed to be the fastest crate out there, but it's easy to understand and read and
+//! flexible enough to be useful as general-purpose HTTP-header crate.
+
+/// Implements error types with support for `Backtrace` and some additional helpers
+#[macro_use] pub mod error;
+/// A HTTP header implementation
 mod header;
-pub mod data;
+// A URL request target implementation
+mod request_target;
+/// Some internal helpers
+mod helpers;
+/// A wrapper to limit IO
+mod io_limiter;
 
-use std::{
-	error::Error,
-	fmt::{ self, Display, Formatter }
-};
+// Re-export public types
 pub use crate::{
-	query_string::QueryString,
-	header::{
-		builders::{ RequestBuilder, ResponseBuilder },
-		header::{ Header, RequestHeader, ResponseHeader }
-	}
+    io_limiter::IoLimiter,
+    header::{ Header, HeaderStartLine, HeaderFields, HeaderFieldsExt },
+    request_target::{ RequestTarget, RequestTargetPath, QueryString }
 };
-
-
-/// A `http_header` related error
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub enum HttpError {
-	InvalidEncoding,
-	TruncatedData,
-	ProtocolViolation,
-	ApiMisuse
-}
-impl Display for HttpError {
-	fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-		write!(f, "{:?}", self)
-	}
-}
-impl Error for HttpError {}

@@ -92,8 +92,8 @@ impl RequestTarget {
 /// ## Warning
 /// The path parser is pretty simple and basically follows two rules only:
 ///  - the path must either be a wildcard (`*`) or must begin with a slash (`/`)
-///  - empty path components are ignored (i.e. `/`, `//` evaluate to `[]` and `/test//path`, `/test//path/` etc. evaluate
-///    to `["test", "path"]`)
+///  - empty path components are ignored (i.e. `/` or `//` etc. evaluate to `[]` and `/test//path` or `/test//path/` etc.
+///    evaluate to `["test", "path"]`)
 ///
 /// Other potentially dangerous components like `..` are treated like normal components and __will not__ cause an error.
 #[derive(Debug, Clone, Default)]
@@ -175,12 +175,13 @@ impl IntoIterator for RequestTargetPath {
 /// validation.
 ///
 /// The following rules apply:
-///  - the query string must begin with a `?`
-///  - keys don't need a value (i.e. `?key0&key1` is valid)
-///  - keys can have an empty value (i.e. `?key0=&key1=` is valid)
-///  - keys can have a non-empty value (i.e. `?key0=value0&key1=value1` is valid)
-///  - empty keys/key-value pairs are ignored (i.e. `?&` evaluates to `[]` and `?key0&&key1` evaluates to
-///    `["key0": "", "key1": ""]` and `?=value0&key1=value1&` evaluates to `["key1": "value1"]`)
+///  - the query string _MUST NOT_ begin with a `?` – it's not a bug, it's a feature: this allows the parser to parse query
+///    query strings in the body (e.g. from HTML forms)
+///  - keys don't need a value (i.e. `key0&key1` is valid)
+///  - keys can have an empty value (i.e. `key0=&key1=` is valid)
+///  - keys can have a non-empty value (i.e. `key0=value0&key1=value1` is valid)
+///  - empty keys/key-value pairs are ignored (i.e. `&` evaluates to `[]`, `key0&&key1` evaluates to
+///    `["key0": "", "key1": ""]` and `=value0&key1=value1&` evaluates to `["key1": "value1"]`)
 #[derive(Debug, Clone, Default)]
 pub struct QueryString {
     /// The key-value fields of the query string

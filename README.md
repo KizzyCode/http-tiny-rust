@@ -4,7 +4,7 @@
 [![crates.io](https://img.shields.io/crates/v/http_header.svg)](https://crates.io/crates/http_header)
 [![Download numbers](https://img.shields.io/crates/d/http_header.svg)](https://crates.io/crates/http_header)
 [![AppVeyor CI](https://ci.appveyor.com/api/projects/status/github/KizzyCode/http_header?svg=true)](https://ci.appveyor.com/project/KizzyCode/http-header)
-[![dependency status](https://deps.rs/crate/http_header/0.8.0/status.svg)](https://deps.rs/crate/http_header/0.8.0)
+[![dependency status](https://deps.rs/crate/http_header/0.8.1/status.svg)](https://deps.rs/crate/http_header/0.8.1)
 
 
 # About

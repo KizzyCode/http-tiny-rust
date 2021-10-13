@@ -63,6 +63,7 @@ impl Header {
     pub fn write(self, output: &mut dyn Write) -> Result {
         self.start_line.write(output)?;
         self.fields.write(output)?;
+        output.flush()?;
         Ok(())
     }
 }
@@ -126,7 +127,7 @@ impl HeaderStartLine {
         &mut self.field2
     }
 
-    /// Reads the header fields from `source`
+    /// Reads the start line from `source`
     pub fn read<T>(source: &mut T) -> Result<Self> where T: BufRead {
         // Read the start line
         let line = source.read_word("\r\n", [Required, Trim])?;
@@ -138,7 +139,7 @@ impl HeaderStartLine {
         };
         Ok(this)
     }
-    /// Writes the HTTP header fields
+    /// Writes the HTTP start line
     pub fn write(self, output: &mut dyn Write) -> Result {
         output.write_all(&self.field0)?;
         output.write_all(b" ")?;

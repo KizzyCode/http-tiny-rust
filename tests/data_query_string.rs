@@ -1,6 +1,6 @@
 mod helpers;
 
-use http_header::RequestTarget;
+use http_tiny::RequestTarget;
 use std::{ collections::BTreeMap, ops::Deref };
 
 

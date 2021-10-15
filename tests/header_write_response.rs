@@ -1,6 +1,6 @@
 mod helpers;
 
-use http_header::{ Header, HeaderStartLine, HeaderFields };
+use http_tiny::{ Header, HeaderStartLine, HeaderFields };
 use std::{ io::Cursor, iter::FromIterator };
 
 
@@ -11,7 +11,7 @@ struct Test {
 impl Test {
     pub fn test(self) {
         let mut serialized = Cursor::new(Vec::new());
-        self.header.write(&mut serialized).unwrap();
+        self.header.write_all(&mut serialized).unwrap();
         assert_eq!(self.raw, serialized.into_inner().as_slice())
     }
 }

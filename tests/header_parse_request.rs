@@ -1,6 +1,6 @@
 mod helpers;
 
-use http_header::{ Header, error::ErrorKind };
+use http_tiny::{ Header, error::ErrorKind };
 use std::{ collections::BTreeMap, ops::Deref };
 
 
@@ -31,7 +31,7 @@ fn test() {
         raw: concat!(
             "POST /upl%C3%B6ad/form.php HTTP/1.1\r\n",
             "Host: www.heise.de\r\n",
-            "User-Agent: http_header/0.3.0\r\n",
+            "User-Agent: http_tiny/0.3.0\r\n",
             "\r\n",
             "Test\r\nBODY\r\nolope"
         ).as_bytes(),
@@ -39,7 +39,7 @@ fn test() {
         target: b"/upl%C3%B6ad/form.php",
         fields: helpers::map([
             ("host", "www.heise.de"),
-            ("user-agent", "http_header/0.3.0")
+            ("user-agent", "http_tiny/0.3.0")
         ])
     }.test();
 }

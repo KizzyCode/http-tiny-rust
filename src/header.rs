@@ -6,7 +6,7 @@ use crate::{
     }
 };
 use std::{
-    str, collections::BTreeMap, iter::FromIterator, ops::Deref,
+    collections::BTreeMap, iter::FromIterator, ops::Deref,
     io::{ BufRead, Write }
 };
 
@@ -60,9 +60,9 @@ impl Header {
         Ok(Self { start_line, fields })
     }
     /// Writes the HTTP header
-    pub fn write(self, output: &mut dyn Write) -> Result {
-        self.start_line.write(output)?;
-        self.fields.write(output)?;
+    pub fn write_all(&self, output: &mut dyn Write) -> Result {
+        self.start_line.write_all(output)?;
+        self.fields.write_all(output)?;
         output.flush()?;
         Ok(())
     }
@@ -140,7 +140,7 @@ impl HeaderStartLine {
         Ok(this)
     }
     /// Writes the HTTP start line
-    pub fn write(self, output: &mut dyn Write) -> Result {
+    pub fn write_all(&self, output: &mut dyn Write) -> Result {
         output.write_all(&self.field0)?;
         output.write_all(b" ")?;
         output.write_all(&self.field1)?;
@@ -193,12 +193,11 @@ impl HeaderFields {
             this.set(key, value);
         }
 
-        // 
         Ok(this)
     }
     /// Writes the HTTP header fields
-    pub fn write(self, output: &mut dyn Write) -> Result {
-        for (key, value) in self.fields {
+    pub fn write_all(&self, output: &mut dyn Write) -> Result {
+        for (key, value) in self.fields.iter() {
             output.write_all(&key)?;
             output.write_all(b": ")?;
             output.write_all(&value)?;
@@ -230,33 +229,5 @@ impl IntoIterator for HeaderFields {
 
     fn into_iter(self) -> Self::IntoIter {
         self.fields.into_iter()
-    }
-}
-
-
-/// Some convenience extensions for `HeaderFields`
-pub trait HeaderFieldsExt {
-    /// Gets the content length
-    fn get_contentlength(&self) -> Result<Option<u64>>;
-    /// Sets the content length
-    fn set_contentlength(&mut self, length: u64);
-}
-impl HeaderFieldsExt for HeaderFields {
-    fn get_contentlength(&self) -> Result<Option<u64>> {
-        // Get the field if it exists
-        let value = match self.get("content-length") {
-            Some(value) => value,
-            None => return Ok(None)
-        };
-
-        // Parse the field value
-        let value_str = str::from_utf8(value)
-            .map_err(|_| einval!("Invalid Content-Length field"))?;
-        let value_int = u64::from_str_radix(value_str, 10)
-            .map_err(|_| einval!("Invalid Content-Length field"))?;
-        Ok(Some(value_int))
-    }
-    fn set_contentlength(&mut self, length: u64) {
-        self.set("content-length", length.to_string())
     }
 }

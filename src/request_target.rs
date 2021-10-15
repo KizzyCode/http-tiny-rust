@@ -74,11 +74,11 @@ impl RequestTarget {
         Ok(this)
     }
     /// Writes the request target
-    pub fn write<T>(self, output: &mut T) -> Result where T: Write {
+    pub fn write_all<T>(&self, output: &mut T) -> Result where T: Write {
         match self {
             Self::Absolute { path, query } => {
-                path.write(output)?;
-                query.write(output)?;
+                path.write_all(output)?;
+                query.write_all(output)?;
             },
             Self::Wildcard => write!(output, "*")?,
         }
@@ -135,7 +135,7 @@ impl RequestTargetPath {
     }
 
     /// Writes the absolute path
-    pub fn write<T>(self, output: &mut T) -> Result where T: Write {
+    pub fn write_all<T>(&self, output: &mut T) -> Result where T: Write {
         // Write a single slash if there are no path components
         if self.components.is_empty() {
             output.write_all(b"/")?;
@@ -221,8 +221,8 @@ impl QueryString {
         Ok(Self { fields })
     }
     /// Writes the query string
-    pub fn write<T>(self, output: &mut T) -> Result where T: Write {
-        for (nth_pair, (key, value)) in self.fields.into_iter().enumerate() {
+    pub fn write_all<T>(&self, output: &mut T) -> Result where T: Write {
+        for (nth_pair, (key, value)) in self.fields.iter().enumerate() {
             // Write delimiter
             match nth_pair {
                 0 => output.write_all(b"?")?,

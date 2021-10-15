@@ -1,6 +1,6 @@
 mod helpers;
 
-use http_header::{ Header, error::ErrorKind };
+use http_tiny::{ Header, error::ErrorKind };
 use std::{ collections::BTreeMap, ops::Deref };
 
 

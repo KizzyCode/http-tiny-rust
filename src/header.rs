@@ -2,7 +2,7 @@ use crate::{
     error::Result,
     helpers::{
         self, BufReadExt, SliceU8Ext,
-        MatchFlag::{ Required, Trim }
+        MatchConfig::{ Required, Trim }
     }
 };
 use std::{
@@ -198,9 +198,9 @@ impl HeaderFields {
     /// Writes the HTTP header fields
     pub fn write_all(&self, output: &mut dyn Write) -> Result {
         for (key, value) in self.fields.iter() {
-            output.write_all(&key)?;
+            output.write_all(key)?;
             output.write_all(b": ")?;
-            output.write_all(&value)?;
+            output.write_all(value)?;
             output.write_all(b"\r\n")?;
         }
         output.write_all(b"\r\n")?;

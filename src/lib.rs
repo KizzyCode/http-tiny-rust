@@ -13,11 +13,11 @@ mod request_target;
 /// Some internal helpers
 mod helpers;
 /// A wrapper to limit IO
-mod io_limiter;
+mod limiter;
 
 // Re-export public types
 pub use crate::{
-    io_limiter::IoLimiter,
+    limiter::Limiter,
     header::{ Header, HeaderStartLine, HeaderFields },
     request_target::{ RequestTarget, RequestTargetPath, QueryString }
 };

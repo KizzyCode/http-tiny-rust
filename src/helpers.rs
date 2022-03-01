@@ -5,12 +5,12 @@ use std::{
 };
 
 
-/// Flags for pattern matching
+/// Config for pattern matching
 #[derive(Debug, PartialEq, Eq)]
-pub enum MatchFlag {
+pub enum MatchConfig {
     /// Treat early EOF as an error
     Required,
-    /// Whether the pattern should be trimmed or not
+    /// Whether the matched pattern should be trimmed or not
     Trim
 }
 
@@ -44,7 +44,7 @@ pub trait BufReadExt where Self: BufRead {
 
     /// Reads a single "word" terminated by `delimiter` (not included)
     fn read_word<T, F>(&mut self, delimiter: T, flags: F) -> Result<Vec<u8>> 
-        where T: AsRef<[u8]>, F: AsRef<[MatchFlag]>
+        where T: AsRef<[u8]>, F: AsRef<[MatchConfig]>
     {
         // Deconstruct delimiter
         let delimiter = delimiter.as_ref();
@@ -60,34 +60,28 @@ pub trait BufReadExt where Self: BufRead {
         }
         
         // Assert that the delimiter exists if required
-        if flags.contains(&MatchFlag::Required) {
-            if !line.ends_with(delimiter) {
-                Err(einval!("Unexpected early EOF"))?;
-            }
+        if flags.contains(&MatchConfig::Required) && !line.ends_with(delimiter) {
+            return Err(einval!("Unexpected early EOF"));
         }
 
         // Trim the match if required
-        if flags.contains(&MatchFlag::Trim) {
-            if line.ends_with(delimiter) {
-                let len_without_delimiter = line.len() - delimiter.len();
-                line.resize(len_without_delimiter, 0);
-            }
+        if flags.contains(&MatchConfig::Trim) && line.ends_with(delimiter) {
+            let len_without_delimiter = line.len() - delimiter.len();
+            line.resize(len_without_delimiter, 0);
         }
         Ok(line)
     }
 
     /// Reads the remaining bytes from `source`
-    fn read_all<T>(&mut self, flags: T) -> Result<Vec<u8>> where T: AsRef<[MatchFlag]> {
+    fn read_all<T>(&mut self, flags: T) -> Result<Vec<u8>> where T: AsRef<[MatchConfig]> {
         // Load the flags and read all data
         let flags = flags.as_ref();
         let mut buf = Vec::new();
         self.read_to_end(&mut buf)?;
 
         // Check for early EOF
-        if flags.contains(&MatchFlag::Required) {
-            if buf.is_empty() {
-                Err(einval!("Unexpected early EOF"))?;
-            }
+        if flags.contains(&MatchConfig::Required) && buf.is_empty() {
+            return Err(einval!("Unexpected early EOF"));
         }
         Ok(buf)
     }

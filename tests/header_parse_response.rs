@@ -22,8 +22,8 @@ impl Test {
 fn test() {
     Test {
         raw: b"HTTP/1.1 200 OK\r\n\r\n",
-		status: 200,
-		reason: b"OK",
+        status: 200,
+        reason: b"OK",
         fields: BTreeMap::new()
     }.test();
     
@@ -47,8 +47,8 @@ fn test() {
             "\r\n",
             "Test\r\nBODY\r\nolope"
         ).as_bytes(),
-		status: 200,
-		reason: b"OK",
+        status: 200,
+        reason: b"OK",
         fields: helpers::map([
             ("server", "nginx"),
             ("date", "Sun, 26 May 2019 22:02:50 GMT"),
@@ -64,7 +64,7 @@ fn test() {
             ("accept-ranges", "bytes"),
             ("content-length", "417889"),
             ("connection", "keep-alive"),
-		])
+        ])
     }.test();
 }
 
@@ -85,17 +85,17 @@ impl TestErr {
 #[test]
 fn test_err() {
     TestErr {
-		data: b"HTTP/1.1 200 OK\r\n",
-		error: ErrorKind::InvalidValue
-	}.test();
+        data: b"HTTP/1.1 200 OK\r\n",
+        error: ErrorKind::InvalidValue
+    }.test();
     TestErr {
-		data: b"\r\n\r\n",
-		error: ErrorKind::InvalidValue
-	}.test();
+        data: b"\r\n\r\n",
+        error: ErrorKind::InvalidValue
+    }.test();
     TestErr {
-		data: b"HTTP/1.1 200 \r\n\r\n",
-		error: ErrorKind::InvalidValue
-	}.test();
+        data: b"HTTP/1.1 200 \r\n\r\n",
+        error: ErrorKind::InvalidValue
+    }.test();
     
     TestErr {
         data: concat!(
@@ -104,6 +104,6 @@ fn test_err() {
             "Date \r\n",
             "\r\n"
         ).as_bytes(),
-		error: ErrorKind::InvalidValue
+        error: ErrorKind::InvalidValue
     }.test();
 }

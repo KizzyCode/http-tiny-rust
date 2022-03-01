@@ -6,9 +6,10 @@ use std::{
 
 /// An I/O-limiter
 ///
-/// This wrapper is useful if e.g. you want to ensure that `Header` will not read more than say 4 kilobyte to prevent DOS
-/// attacks
-pub struct IoLimiter<T> {
+/// This wrapper restricts the maximum amount of bytes that can be read/written and returns an EOF if this limit is
+/// exceeded. It is useful if e.g. you want to ensure that `Header` will not read more than say 4 kilobyte to prevent DOS
+/// attacks.
+pub struct Limiter<T> {
     /// The underlying I/O element
     inner: T,
     /// The amount of bytes left to read
@@ -16,7 +17,7 @@ pub struct IoLimiter<T> {
     /// The amount of bytes left to write
     write_left: usize
 }
-impl<T> IoLimiter<T> {
+impl<T> Limiter<T> {
     /// Creates a new I/O-limiter
     pub const fn new(io: T, read_max: usize, write_max: usize) -> Self {
         Self { inner: io, read_left: read_max, write_left: write_max }
@@ -27,7 +28,7 @@ impl<T> IoLimiter<T> {
         self.inner
     }
 }
-impl<T> Read for IoLimiter<T> where T: Read {
+impl<T> Read for Limiter<T> where T: Read {
     fn read(&mut self, buf: &mut [u8]) -> Result<usize> {
         // Read into `buf`
         let to_read = cmp::min(self.read_left, buf.len());
@@ -38,7 +39,7 @@ impl<T> Read for IoLimiter<T> where T: Read {
         Ok(read)
     }
 }
-impl<T> BufRead for IoLimiter<T> where T: BufRead {
+impl<T> BufRead for Limiter<T> where T: BufRead {
     fn fill_buf(&mut self) -> Result<&[u8]> {
         self.inner.fill_buf()
     }
@@ -46,7 +47,7 @@ impl<T> BufRead for IoLimiter<T> where T: BufRead {
         self.inner.consume(amt)
     }
 }
-impl<T> Write for IoLimiter<T> where T: Write {
+impl<T> Write for Limiter<T> where T: Write {
     fn write(&mut self, buf: &[u8]) -> Result<usize> {
         // Write from `buf`
         let to_write = cmp::min(self.write_left, buf.len());

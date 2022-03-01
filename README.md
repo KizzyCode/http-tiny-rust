@@ -4,7 +4,7 @@
 [![crates.io](https://img.shields.io/crates/v/http_tiny.svg)](https://crates.io/crates/http_tiny)
 [![Download numbers](https://img.shields.io/crates/d/http_tiny.svg)](https://crates.io/crates/http_tiny)
 [![AppVeyor CI](https://ci.appveyor.com/api/projects/status/github/KizzyCode/http_tiny-rust?svg=true)](https://ci.appveyor.com/project/KizzyCode/http-tiny-rust)
-[![dependency status](https://deps.rs/crate/http_tiny/0.9.0/status.svg)](https://deps.rs/crate/http_tiny/0.9.0)
+[![dependency status](https://deps.rs/crate/http_tiny/1.0.0/status.svg)](https://deps.rs/crate/http_tiny/1.0.0)
 
 
 # About

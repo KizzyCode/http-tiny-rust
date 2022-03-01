@@ -1,6 +1,6 @@
 use crate::{
     error::Result,
-    helpers::{ self, BufReadExt, MatchFlag::Trim }
+    helpers::{ self, BufReadExt, MatchConfig::Trim }
 };
 use std::{
     mem, slice, collections::BTreeMap, iter::FromIterator, ops::Deref,
@@ -69,7 +69,7 @@ impl RequestTarget {
                 }
             },
             Some(b'*') => Self::Wildcard,
-            first => Err(einval!("Invalid request target: {:?}", first))?
+            first => return Err(einval!("Invalid request target: {:?}", first))
         };
         Ok(this)
     }
@@ -145,7 +145,7 @@ impl RequestTargetPath {
         // Write the components
         for component in self.components.iter() {
             output.write_all(b"/")?;
-            output.write_all(&component)?;
+            output.write_all(component)?;
         }
         Ok(())
     }
@@ -230,10 +230,10 @@ impl QueryString {
             }
 
             // Write key and value
-            output.write_all(&key)?;
+            output.write_all(key)?;
             if !value.is_empty() {
                 output.write_all(b"=")?;
-                output.write_all(&value)?;
+                output.write_all(value)?;
             }
         }
         Ok(())

@@ -1,4 +1,4 @@
-Copyright (c) 2021, Keziah Biermann
+Copyright (c) 2022, Keziah Biermann
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the 
 following conditions are met:

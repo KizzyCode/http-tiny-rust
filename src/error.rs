@@ -7,7 +7,7 @@ use std::{
 
 /// Creates a new variant
 #[macro_export] macro_rules! e {
-    ($kind:expr, $($arg:tt)*) => ({ $crate::error::ErrorImpl::with_string($kind, format!($($arg)*)) })
+    ($kind:expr, $($arg:tt)*) => ({ $crate::error::ErrorImpl::new($kind, format!($($arg)*)) })
 }
 /// Creates a new `ErrorImpl::InOutError` kind
 #[macro_export] macro_rules! eio {
@@ -41,7 +41,7 @@ impl Display for ErrorKind {
 define_error!(ErrorImpl);
 impl From<io::Error> for ErrorImpl<ErrorKind> {
     fn from(underlying: io::Error) -> Self {
-        ErrorImpl::with_string(ErrorKind::InOutError, underlying)
+        ErrorImpl::new(ErrorKind::InOutError, underlying.to_string())
     }
 }
 

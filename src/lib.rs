@@ -10,6 +10,8 @@
 mod header;
 // A URL request target implementation
 mod request_target;
+/// A percent coder
+mod percent_coder;
 /// Some internal helpers
 mod helpers;
 /// A wrapper to limit IO
@@ -19,5 +21,6 @@ mod limiter;
 pub use crate::{
     limiter::Limiter,
     header::{ Header, HeaderStartLine, HeaderFields },
+    percent_coder::{ PercentEncoder, PercentDecoder },
     request_target::{ RequestTarget, RequestTargetPath, QueryString }
 };

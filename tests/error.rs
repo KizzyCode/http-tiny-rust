@@ -1,9 +1,9 @@
 #[macro_use] extern crate http_tiny;
 
-use std::error;
+use std::error::Error;
 
 
-fn assert_impl_error<T>(object: T) where T: error::Error {
+fn assert_impl_error<T>(object: T) where T: Error {
     println!("Error: {object}");
 }
 

@@ -1,6 +1,6 @@
 use ebacktrace::define_error;
 use std::{
-    io, result,
+    error, io, result,
     fmt::{ self, Display, Formatter }
 };
 
@@ -34,6 +34,9 @@ impl Display for ErrorKind {
             Self::InvalidValue => write!(f, "A value is invalid")
         }
     }
+}
+impl error::Error for ErrorKind {
+    /* No members to implement */
 }
 
 

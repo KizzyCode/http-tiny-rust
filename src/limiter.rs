@@ -1,8 +1,7 @@
 use std::{
     cmp,
-    io::{ Read, BufRead, Write, Result }
+    io::{BufRead, Read, Result, Write},
 };
-
 
 /// An I/O-limiter
 ///
@@ -15,7 +14,7 @@ pub struct Limiter<T> {
     /// The amount of bytes left to read
     read_left: usize,
     /// The amount of bytes left to write
-    write_left: usize
+    write_left: usize,
 }
 impl<T> Limiter<T> {
     /// Creates a new I/O-limiter
@@ -28,18 +27,24 @@ impl<T> Limiter<T> {
         self.inner
     }
 }
-impl<T> Read for Limiter<T> where T: Read {
+impl<T> Read for Limiter<T>
+where
+    T: Read,
+{
     fn read(&mut self, buf: &mut [u8]) -> Result<usize> {
         // Read into `buf`
         let to_read = cmp::min(self.read_left, buf.len());
         let read = self.inner.read(&mut buf[..to_read])?;
-        
+
         // Update the counter
         self.read_left -= read;
         Ok(read)
     }
 }
-impl<T> BufRead for Limiter<T> where T: BufRead {
+impl<T> BufRead for Limiter<T>
+where
+    T: BufRead,
+{
     fn fill_buf(&mut self) -> Result<&[u8]> {
         self.inner.fill_buf()
     }
@@ -47,7 +52,10 @@ impl<T> BufRead for Limiter<T> where T: BufRead {
         self.inner.consume(amt)
     }
 }
-impl<T> Write for Limiter<T> where T: Write {
+impl<T> Write for Limiter<T>
+where
+    T: Write,
+{
     fn write(&mut self, buf: &[u8]) -> Result<usize> {
         // Write from `buf`
         let to_write = cmp::min(self.write_left, buf.len());

@@ -1,15 +1,16 @@
-#[macro_use] extern crate http_tiny;
+extern crate http_tiny;
 
-use std::error::Error;
+use http_tiny::error::Error;
 
-
-fn assert_impl_error<T>(object: T) where T: Error {
+fn assert_impl_error<T>(object: T)
+where
+    T: std::error::Error,
+{
     println!("Error: {object}");
 }
 
-
 #[test]
 fn test() {
-    let error = eio!("Some test error");
+    let error = Error::Http;
     assert_impl_error(error);
 }

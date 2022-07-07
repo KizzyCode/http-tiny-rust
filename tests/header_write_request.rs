@@ -1,12 +1,11 @@
 mod helpers;
 
-use http_tiny::{ Header, HeaderStartLine, HeaderFields };
-use std::{ io::Cursor, iter::FromIterator };
-
+use http_tiny::{Header, HeaderFields, HeaderStartLine};
+use std::{io::Cursor, iter::FromIterator};
 
 struct Test {
     header: Header,
-    raw: &'static [u8]
+    raw: &'static [u8],
 }
 impl Test {
     pub fn test(self) {
@@ -18,24 +17,17 @@ impl Test {
 #[test]
 fn test() {
     Test {
-        header: Header::new(
-            HeaderStartLine::new_request("GET", "/"),
-            HeaderFields::new()
-        ),
-        raw: b"GET / HTTP/1.1\r\n\r\n"
-    }.test();
-    
+        header: Header::new(HeaderStartLine::new_request("GET", "/"), HeaderFields::new()),
+        raw: b"GET / HTTP/1.1\r\n\r\n",
+    }
+    .test();
+
     Test {
         header: Header::new(
             HeaderStartLine::new_request("GET", "/"),
-            HeaderFields::from_iter([
-                ("Host", "www.heise.de")
-            ])
+            HeaderFields::from_iter([("Host", "www.heise.de")]),
         ),
-        raw: concat!(
-            "GET / HTTP/1.1\r\n",
-            "host: www.heise.de\r\n",
-            "\r\n"
-        ).as_bytes()
-    }.test();
+        raw: concat!("GET / HTTP/1.1\r\n", "host: www.heise.de\r\n", "\r\n").as_bytes(),
+    }
+    .test();
 }

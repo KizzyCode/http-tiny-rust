@@ -4,7 +4,7 @@
 [![crates.io](https://img.shields.io/crates/v/http_tiny.svg)](https://crates.io/crates/http_tiny)
 [![Download numbers](https://img.shields.io/crates/d/http_tiny.svg)](https://crates.io/crates/http_tiny)
 [![AppVeyor CI](https://ci.appveyor.com/api/projects/status/github/KizzyCode/http_tiny-rust?svg=true)](https://ci.appveyor.com/project/KizzyCode/http-tiny-rust)
-[![dependency status](https://deps.rs/crate/http_tiny/1.1.0/status.svg)](https://deps.rs/crate/http_tiny/1.1.0)
+[![dependency status](https://deps.rs/crate/http_tiny/2.0.0-pre.0/status.svg)](https://deps.rs/crate/http_tiny/2.0.0-pre.0)
 
 
 # About
@@ -12,3 +12,7 @@
 
 It is not designed to be the fastest crate out there, but it's easy to understand and read and flexible enough to be
 useful as general-purpose HTTP-header crate.
+
+## Query strings
+Please note that query string parsing and percent encoding has been
+[moved to a different crate](https://crates.io/crates/querystring_tiny) for ease of maintainance.

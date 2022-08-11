@@ -1,3 +1,5 @@
+//! Some helper functions
+
 use crate::error::Error;
 use std::{
     borrow::Cow,

@@ -87,7 +87,7 @@ where
 
         // Assert that the delimiter exists if required
         if flags.contains(&MatchConfig::Required) && !line.ends_with(delimiter) {
-            return Err(Error::Http);
+            return Err(error!("Truncated input/field"));
         }
 
         // Trim the match if required
@@ -109,7 +109,7 @@ where
 
         // Check for early EOF
         if flags.contains(&MatchConfig::Required) && buf.is_empty() {
-            return Err(Error::Http);
+            return Err(error!("Truncated input/field"));
         }
         Ok(buf)
     }

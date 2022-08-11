@@ -19,7 +19,6 @@ is-it-maintained-issue-resolution = { repository = "KizzyCode/http_tiny-rust" }
 
 
 [dependencies]
-thiserror = "1.0"
 
 
 [profile.release]

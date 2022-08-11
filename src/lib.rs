@@ -1,8 +1,5 @@
 #![doc = include_str!("../README.md")]
 
-#[macro_use]
-extern crate thiserror;
-
 /// Implements error types with support for `Backtrace` and some additional helpers
 #[macro_use]
 pub mod error;

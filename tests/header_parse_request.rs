@@ -1,6 +1,6 @@
 mod helpers;
 
-use http_tiny::{error::Error, Header};
+use http_tiny::Header;
 use std::{collections::BTreeMap, ops::Deref};
 
 struct Test {
@@ -40,7 +40,7 @@ fn test() {
 #[derive(Debug)]
 struct TestErr {
     data: &'static [u8],
-    error: Error,
+    error: &'static str,
 }
 impl TestErr {
     fn test(self) {
@@ -48,23 +48,22 @@ impl TestErr {
             Err(error) => error,
             Ok(header) => panic!("Unexpected `Ok` for header: {} ({:?})", String::from_utf8_lossy(self.data), header),
         };
-        assert_eq!(
-            self.error.to_string(),
-            error.to_string(),
-            "Unexpected error for header: {}",
+        assert!(
+            error.to_string().starts_with(self.error),
+            "Unexpected error \"{error}\" for header: {}",
             String::from_utf8_lossy(self.data)
         );
     }
 }
 #[test]
 fn test_err() {
-    TestErr { data: b"HEAD / HTTP/1.1\r\n", error: Error::Http }.test();
-    TestErr { data: b"\r\n\r\n", error: Error::Http }.test();
-    TestErr { data: b"HEAD / \r\n\r\n", error: Error::Http }.test();
+    TestErr { data: b"HEAD / HTTP/1.1\r\n", error: "Truncated input/field" }.test();
+    TestErr { data: b"\r\n\r\n", error: "Truncated input/field" }.test();
+    TestErr { data: b"HEAD / \r\n\r\n", error: "Truncated input/field" }.test();
 
     TestErr {
         data: concat!("HEAD / HTTP/1.1\r\n", "Host: www.heise.de\r\n", "User-Agent \r\n", "\r\n").as_bytes(),
-        error: Error::Http,
+        error: "Truncated input/field",
     }
     .test();
 }

@@ -1,3 +1,5 @@
+//! Implements an I/O limiter adapter
+
 use std::{
     cmp,
     io::{BufRead, Read, Result, Write},

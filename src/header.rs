@@ -125,7 +125,23 @@ impl HeaderStartLine {
     pub fn request_target_mut(&mut self) -> &mut Vec<u8> {
         &mut self.field1
     }
+    /// Interprets the start line as request and returns the field containing the HTTP version
+    pub fn request_version(&self) -> &[u8] {
+        &self.field2
+    }
+    /// Interprets the start line as request and returns the field containing the HTTP version
+    pub fn request_version_mut(&mut self) -> &mut Vec<u8> {
+        &mut self.field2
+    }
 
+    /// Interprets the start line as response and returns the field containing the HTTP version
+    pub fn response_version(&self) -> &[u8] {
+        &self.field0
+    }
+    /// Interprets the start line as response and returns the field containing the HTTP version
+    pub fn response_version_mut(&mut self) -> &mut Vec<u8> {
+        &mut self.field0
+    }
     /// Interprets the start line as response and returns the field containing the response status code
     pub fn response_binstatus(&self) -> &[u8] {
         &self.field1

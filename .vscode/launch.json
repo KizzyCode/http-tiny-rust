@@ -10,10 +10,10 @@
                     "test",
                     "--no-run",
                     "--lib",
-                    "--package=FIXME"
+                    "--package=http_tiny"
                 ],
                 "filter": {
-                    "name": "FIXME",
+                    "name": "http_tiny",
                     "kind": "lib"
                 }
             },

@@ -21,7 +21,7 @@ pub struct Error {
     /// The underlying I/O error
     error: String,
     /// The underlying source error
-    source: Option<Box<dyn std::error::Error>>,
+    source: Option<Box<dyn std::error::Error + Send>>,
     /// The file where the error occurred
     file: &'static str,
     /// The line where the error occurred
@@ -40,7 +40,7 @@ impl Error {
     #[doc(hidden)]
     pub fn with_error<T>(error: T, file: &'static str, line: u32) -> Self
     where
-        T: error::Error + 'static,
+        T: error::Error + Send + 'static,
     {
         let error = Box::new(error);
         Self { error: format!("{error}"), source: Some(error), file, line }

@@ -1,18 +1,8 @@
 #![doc = include_str!("../README.md")]
 
-/// Implements error types with support for `Backtrace` and some additional helpers
-#[macro_use]
-pub mod error;
-
-/// A HTTP header implementation
+pub mod bytetraits;
 mod header;
-/// Some internal helpers
-mod helpers;
-/// A wrapper to limit IO
-mod limiter;
+mod iotraits;
 
-// Re-export public types
-pub use crate::{
-    header::{Header, HeaderFields, HeaderStartLine},
-    limiter::Limiter,
-};
+// Re-export public header types
+pub use crate::header::{Header, HeaderFields, HeaderStartLine};

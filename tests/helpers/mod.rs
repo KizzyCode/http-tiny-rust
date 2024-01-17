@@ -1,4 +1,6 @@
+use http_tiny::bytetraits::IntoBytes;
 use std::{
+    borrow::Cow,
     collections::BTreeMap,
     io::{BufReader, Cursor},
 };
@@ -14,11 +16,11 @@ where
 
 /// Creates a new map
 #[allow(unused)]
-pub fn map<I, K, V>(pairs: I) -> BTreeMap<Vec<u8>, Vec<u8>>
+pub fn map<I, K, V>(pairs: I) -> BTreeMap<Cow<'static, [u8]>, Cow<'static, [u8]>>
 where
     I: IntoIterator<Item = (K, V)>,
-    K: Into<Vec<u8>>,
-    V: Into<Vec<u8>>,
+    K: IntoBytes,
+    V: IntoBytes,
 {
-    pairs.into_iter().map(|(k, v)| (k.into(), v.into())).collect()
+    pairs.into_iter().map(|(k, v)| (k.into_bytes(), v.into_bytes())).collect()
 }

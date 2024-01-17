@@ -1,27 +1,17 @@
-//! Some helper functions
+//! Some I/O helper traits
 
-use crate::error::Error;
 use std::{
-    borrow::Cow,
-    io::{BufRead, BufReader, Cursor},
+    io::{BufRead, Error, ErrorKind},
     slice,
 };
 
 /// Config for pattern matching
 #[derive(Debug, PartialEq, Eq)]
 pub enum MatchConfig {
-    /// Treat early EOF as an error
+    /// Treat an EOF before a match occurrs as error
     Required,
     /// Whether the matched pattern should be trimmed or not
     Trim,
-}
-
-/// Creates a readable data source over a slice
-pub fn memreader<T>(data: T) -> impl BufRead
-where
-    T: AsRef<[u8]>,
-{
-    BufReader::new(Cursor::new(data))
 }
 
 /// A convenience extension for `BufRead`
@@ -87,7 +77,7 @@ where
 
         // Assert that the delimiter exists if required
         if flags.contains(&MatchConfig::Required) && !line.ends_with(delimiter) {
-            return Err(error!("Truncated input/field"));
+            return Err(ErrorKind::UnexpectedEof.into());
         }
 
         // Trim the match if required
@@ -109,29 +99,8 @@ where
 
         // Check for early EOF
         if flags.contains(&MatchConfig::Required) && buf.is_empty() {
-            return Err(error!("Truncated input/field"));
+            return Err(ErrorKind::UnexpectedEof.into());
         }
         Ok(buf)
-    }
-}
-
-/// A convenience extension for `[u8]`
-pub trait SliceU8Ext
-where
-    Self: AsRef<[u8]>,
-{
-    /// Converts slice to ASCII-lowercase (zero copy if the slice is already lowercase only)
-    fn as_ascii_lowercase(&self) -> Cow<[u8]>;
-}
-impl<T> SliceU8Ext for T
-where
-    T: AsRef<[u8]>,
-{
-    fn as_ascii_lowercase(&self) -> Cow<[u8]> {
-        let slice = self.as_ref();
-        match slice.iter().all(|b| b.is_ascii_lowercase()) {
-            true => Cow::Borrowed(slice),
-            false => Cow::Owned(slice.to_ascii_lowercase()),
-        }
     }
 }

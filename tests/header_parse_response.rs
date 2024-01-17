@@ -1,13 +1,13 @@
 mod helpers;
 
 use http_tiny::Header;
-use std::{collections::BTreeMap, ops::Deref};
+use std::{borrow::Cow, collections::BTreeMap, io::ErrorKind, ops::Deref};
 
 struct Test {
     raw: &'static [u8],
     status: u16,
     reason: &'static [u8],
-    fields: BTreeMap<Vec<u8>, Vec<u8>>,
+    fields: BTreeMap<Cow<'static, [u8]>, Cow<'static, [u8]>>,
 }
 impl Test {
     fn test(self) {
@@ -66,7 +66,7 @@ fn test() {
 
 struct TestErr {
     data: &'static [u8],
-    error: &'static str,
+    error: ErrorKind,
 }
 impl TestErr {
     fn test(self) {
@@ -74,8 +74,9 @@ impl TestErr {
             Err(error) => error,
             Ok(header) => panic!("Unexpected `Ok` for header: {} ({:?})", String::from_utf8_lossy(self.data), header),
         };
-        assert!(
-            error.to_string().starts_with(self.error),
+        assert_eq!(
+            error.kind(),
+            self.error,
             "Unexpected error \"{error}\" for header: {}",
             String::from_utf8_lossy(self.data)
         );
@@ -83,13 +84,13 @@ impl TestErr {
 }
 #[test]
 fn test_err() {
-    TestErr { data: b"HTTP/1.1 200 OK\r\n", error: "Truncated input/field" }.test();
-    TestErr { data: b"\r\n\r\n", error: "Truncated input/field" }.test();
-    TestErr { data: b"HTTP/1.1 200 \r\n\r\n", error: "Truncated input/field" }.test();
+    TestErr { data: b"HTTP/1.1 200 OK\r\n", error: ErrorKind::UnexpectedEof }.test();
+    TestErr { data: b"\r\n\r\n", error: ErrorKind::UnexpectedEof }.test();
+    TestErr { data: b"HTTP/1.1 200 \r\n\r\n", error: ErrorKind::UnexpectedEof }.test();
 
     TestErr {
         data: concat!("HTTP/1.1 200 OK\r\n", "Server: nginx\r\n", "Date \r\n", "\r\n").as_bytes(),
-        error: "Truncated input/field",
+        error: ErrorKind::UnexpectedEof,
     }
     .test();
 }

@@ -13,35 +13,35 @@ where
     Self: Sized,
 {
     /// Creates a new response
-    fn new<S, R>(status: S, reason: R) -> Self
+    fn new_response<S, R>(status: S, reason: R) -> Self
     where
         S: IntoBytes,
         R: IntoBytes;
 
     /// Sets an arbitrary header key-value pair
-    fn header<K, V>(self, key: K, value: V) -> Self
+    fn set_header<K, V>(self, key: K, value: V) -> Self
     where
         K: IntoBytes,
         V: IntoBytes;
 
     /// Sets the status/reason tuple for `self`
-    fn content_type<T>(self, type_: T) -> Self
+    fn set_content_type<T>(self, type_: T) -> Self
     where
         T: IntoBytes,
     {
-        self.header(HEADER_CONTENTTYPE, type_)
+        self.set_header(HEADER_CONTENTTYPE, type_)
     }
 
     /// Sets the "Content-Length" header for `self`
-    fn content_length<T>(self, length: T) -> Self
+    fn set_content_length<T>(self, length: T) -> Self
     where
         T: IntoBytes,
     {
-        self.header(HEADER_CONTENTLENGTH, length)
+        self.set_header(HEADER_CONTENTLENGTH, length)
     }
 }
 impl ResponseBuilder for Header {
-    fn new<S, R>(status: S, reason: R) -> Self
+    fn new_response<S, R>(status: S, reason: R) -> Self
     where
         S: IntoBytes,
         R: IntoBytes,
@@ -51,7 +51,7 @@ impl ResponseBuilder for Header {
         Header::new(start_line, fields)
     }
 
-    fn header<K, V>(mut self, key: K, value: V) -> Self
+    fn set_header<K, V>(mut self, key: K, value: V) -> Self
     where
         K: IntoBytes,
         V: IntoBytes,

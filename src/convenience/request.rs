@@ -11,27 +11,27 @@ where
     Self: Sized,
 {
     /// Creates a new request
-    fn new<M, T>(method: M, target: T) -> Self
+    fn new_request<M, T>(method: M, target: T) -> Self
     where
         M: IntoBytes,
         T: IntoBytes;
 
     /// Sets an arbitrary header key-value pair
-    fn header<K, V>(self, key: K, value: V) -> Self
+    fn set_header<K, V>(self, key: K, value: V) -> Self
     where
         K: IntoBytes,
         V: IntoBytes;
 
     /// Sets the "Content-Length" header for `self`
-    fn content_length<T>(self, length: T) -> Self
+    fn set_content_length<T>(self, length: T) -> Self
     where
         T: IntoBytes,
     {
-        self.header(HEADER_CONTENTLENGTH, length)
+        self.set_header(HEADER_CONTENTLENGTH, length)
     }
 }
 impl RequestBuilder for Header {
-    fn new<M, T>(method: M, target: T) -> Self
+    fn new_request<M, T>(method: M, target: T) -> Self
     where
         M: IntoBytes,
         T: IntoBytes,
@@ -41,7 +41,7 @@ impl RequestBuilder for Header {
         Header::new(start_line, fields)
     }
 
-    fn header<K, V>(mut self, key: K, value: V) -> Self
+    fn set_header<K, V>(mut self, key: K, value: V) -> Self
     where
         K: IntoBytes,
         V: IntoBytes,

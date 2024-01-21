@@ -12,8 +12,8 @@ struct Test {
 impl Test {
     fn test(self) {
         let header = Header::read(&mut helpers::source(self.raw)).expect("Failed to read header");
-        assert_eq!(self.method, header.start_line().request_method());
-        assert_eq!(self.target, header.start_line().request_target());
+        assert_eq!(self.method, header.start_line().field0());
+        assert_eq!(self.target, header.start_line().field1());
         assert_eq!(&self.fields, header.fields().deref());
     }
 }

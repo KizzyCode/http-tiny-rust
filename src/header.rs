@@ -114,55 +114,6 @@ impl HeaderStartLine {
         Self { field0: "HTTP/1.1".into_bytes(), field1: status, field2: reason.into_bytes() }
     }
 
-    /// Interprets the start line as request and returns the field containing the request method
-    pub fn request_method(&self) -> &[u8] {
-        &self.field0
-    }
-    /// Interprets the start line as request and returns the field containing the request method
-    pub fn request_method_mut(&mut self) -> &mut Cow<'static, [u8]> {
-        &mut self.field0
-    }
-    /// Interprets the start line as request and returns the field containing the request target
-    pub fn request_target(&self) -> &[u8] {
-        &self.field1
-    }
-    /// Interprets the start line as request and returns the field containing the request target
-    pub fn request_target_mut(&mut self) -> &mut Cow<'static, [u8]> {
-        &mut self.field1
-    }
-    /// Interprets the start line as request and returns the field containing the HTTP version
-    pub fn request_version(&self) -> &[u8] {
-        &self.field2
-    }
-    /// Interprets the start line as request and returns the field containing the HTTP version
-    pub fn request_version_mut(&mut self) -> &mut Cow<'static, [u8]> {
-        &mut self.field2
-    }
-
-    /// Interprets the start line as response and returns the field containing the HTTP version
-    pub fn response_version(&self) -> &[u8] {
-        &self.field0
-    }
-    /// Interprets the start line as response and returns the field containing the HTTP version
-    pub fn response_version_mut(&mut self) -> &mut Cow<'static, [u8]> {
-        &mut self.field0
-    }
-    /// Interprets the start line as response and returns the field containing the response status code
-    pub fn response_binstatus(&self) -> &[u8] {
-        &self.field1
-    }
-    /// Interprets the start line as response and returns the field containing the response status code
-    pub fn response_binstatus_mut(&mut self) -> &mut Cow<'static, [u8]> {
-        &mut self.field1
-    }
-    /// Interprets the start line as response and returns the field containing the response status code
-    pub fn response_reason(&self) -> &[u8] {
-        &self.field2
-    }
-    pub fn response_reason_mut(&mut self) -> &mut Cow<'static, [u8]> {
-        &mut self.field2
-    }
-
     /// Reads the start line from `source`
     pub fn read<T>(source: &mut T) -> Result<Self, Error>
     where
@@ -190,6 +141,33 @@ impl HeaderStartLine {
         output.write_all(&self.field2)?;
         output.write_all(b"\r\n")?;
         Ok(())
+    }
+
+    /// The first field of the header line (i.e. either "method" for requests or "version" for response)
+    pub fn field0(&self) -> &[u8] {
+        self.field0.as_ref()
+    }
+    /// The first field of the header line (i.e. either "method" for requests or "version" for response)
+    pub fn field0_mut(&mut self) -> &mut Cow<'static, [u8]> {
+        &mut self.field0
+    }
+
+    /// The second field of the header line (i.e. either "target" for requests or "status" for response)
+    pub fn field1(&self) -> &[u8] {
+        self.field1.as_ref()
+    }
+    /// The second field of the header line (i.e. either "target" for requests or "status" for response)
+    pub fn field1_mut(&mut self) -> &mut Cow<'static, [u8]> {
+        &mut self.field1
+    }
+
+    /// The third field of the header line (i.e. either "version" for requests or "reason" for response)
+    pub fn field2(&self) -> &[u8] {
+        self.field2.as_ref()
+    }
+    /// The third field of the header line (i.e. either "version" for requests or "reason" for response)
+    pub fn field2_mut(&mut self) -> &mut Cow<'static, [u8]> {
+        &mut self.field2
     }
 }
 

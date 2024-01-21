@@ -1,5 +1,7 @@
 #![doc = include_str!("../README.md")]
 
+#[cfg(feature = "convenience")]
+pub mod convenience;
 pub mod bytetraits;
 mod header;
 mod iotraits;

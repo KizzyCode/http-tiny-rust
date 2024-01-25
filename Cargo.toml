@@ -1,5 +1,5 @@
 [package]
-name = "http-tiny"
+name = "http_tiny"
 edition = "2021"
 version = "2.0.0-pre.5"
 authors = ["KizzyCode Software Labs./Keziah Biermann"]

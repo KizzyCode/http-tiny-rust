@@ -1,21 +1,21 @@
 [package]
-name = "http_tiny"
+name = "http-tiny"
 edition = "2021"
-version = "2.0.0-pre.4"
+version = "2.0.0-pre.5"
 authors = ["KizzyCode Software Labs./Keziah Biermann"]
 description = "A simple, dependency-less HTTP-header builder and parser"
 categories = ["data-structures", "encoding", "network-programming", "parsing", "web-programming"]
 keywords = ["HTTP", "HTTP-Header", "HTTP-Request", "HTTP-Response"]
 license = "BSD-2-Clause OR MIT"
-repository = "https://github.com/KizzyCode/http_tiny-rust"
+repository = "https://github.com/KizzyCode/http-tiny-rust"
 readme = "README.md"
 
 
 [badges]
-appveyor = { repository = "KizzyCode/http_tiny-rust" }
+appveyor = { repository = "KizzyCode/http-tiny-rust" }
 maintenance = { status = "actively-developed" }
-is-it-maintained-open-issues = { repository = "KizzyCode/http_tiny-rust" }
-is-it-maintained-issue-resolution = { repository = "KizzyCode/http_tiny-rust" }
+is-it-maintained-open-issues = { repository = "KizzyCode/http-tiny-rust" }
+is-it-maintained-issue-resolution = { repository = "KizzyCode/http-tiny-rust" }
 
 
 [features]

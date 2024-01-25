@@ -35,6 +35,11 @@ impl<'a> AsBytes<'a> for &'a [u8] {
         self
     }
 }
+impl<'a> AsBytes<'a> for &'a Vec<u8> {
+    fn as_bytes(self) -> &'a [u8] {
+        self
+    }
+}
 
 /// A trait for types that can be reasonably converted into a sequence of bytes
 pub trait IntoBytes
